@@ -206,7 +206,9 @@ export class TeamScheduleSearchComponent implements OnInit {
   }
 
   getStaffs(teams, orgCode) {
-    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${teams}&stationCode=${orgCode}`)
+    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${teams}&stationCode=${orgCode}`, {
+      animation: true
+    })
             .subscribe(res => {
                 this.staffList = res.data;
             });

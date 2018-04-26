@@ -56,7 +56,9 @@ export class StaffInputComponent implements OnInit {
   }
 
   getInfo(staffId) {
-    this.sharedService.get(`/User/getUserDetail?userId=${staffId}`)
+    this.sharedService.get(`/User/getUserDetail?userId=${staffId}`, {
+      animation: true
+    })
       .subscribe(res => {
         this.data = res.data;
         this.form.patchValue(res.data);

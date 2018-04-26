@@ -27,7 +27,7 @@ export class AttendanceCheckComponent implements OnInit {
   login: Observable<any> = new Observable<any>();
 
   constructor(
-    private sharedService: SharedService, 
+    private sharedService: SharedService,
     private store: Store<any>
   ) {
     this.login = store.select('login');
@@ -183,7 +183,9 @@ export class AttendanceCheckComponent implements OnInit {
   }
 
   getStaff() {
-    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`)
+    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`, {
+      animation: true
+    })
             .subscribe(res => {
               this.staffList = res.data;
             });

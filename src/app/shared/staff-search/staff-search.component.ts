@@ -135,7 +135,9 @@ export class StaffSearchComponent implements OnInit {
   }
 
   resetPwd(id) {
-    this.sharedService.get(`/resetPassword?userId=${id}`)
+    this.sharedService.get(`/resetPassword?userId=${id}`, {
+      animation: true
+    })
         .subscribe(res => {
             this.sharedService.addAlert('警告', '重置成功');
         });

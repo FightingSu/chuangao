@@ -161,16 +161,18 @@ export class TrainExecuteComponent implements OnInit {
   }
   getStaffInfo(planId) {
     this.isChosen = true;
-    this.sharedService.get(`/Train/planGetById?id=${planId}`)
-            .subscribe(res => {
-                this.data = res.data;
-                this.form.patchValue(res.data.trainPlanData);
-                this.planFilePath = res.data.trainPlanData.trainPlanFile;
-                this.endDate = res.data.trainPlanData.trainEndDate;
-                this.startDate = res.data.trainPlanData.trainStartDate;
-                this.trainForm.patchValue({trainPlanName: res.data.trainPlanData.trainName});
-                this.doId = res.data.trainDoListDataList.filter(el => el.trainDoOrgCode === this.orgCode)[0].doId;
-            });
+    this.sharedService.get(`/Train/planGetById?id=${planId}`, {
+        animation: true
+      })
+      .subscribe(res => {
+          this.data = res.data;
+          this.form.patchValue(res.data.trainPlanData);
+          this.planFilePath = res.data.trainPlanData.trainPlanFile;
+          this.endDate = res.data.trainPlanData.trainEndDate;
+          this.startDate = res.data.trainPlanData.trainStartDate;
+          this.trainForm.patchValue({trainPlanName: res.data.trainPlanData.trainName});
+          this.doId = res.data.trainDoListDataList.filter(el => el.trainDoOrgCode === this.orgCode)[0].doId;
+      });
   }
   getInfo() {
     if (+this.searchForm.value.hasDo === 1) {
@@ -300,14 +302,16 @@ export class TrainExecuteComponent implements OnInit {
   addStaffs() {
     this.isShow = true;
     if (this.orgType !== 3) {
-      this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgCode}`)
-          .subscribe(res => {
-              this.joinStaffList = res.data;
-              const selected = this.activedStaffList;
-              this.joinStaffList.filter(el => selected.findIndex(item => item.userId === el.userId) > -1).forEach(el => {
-                el.choose = true;
-              });
+      this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgCode}`, {
+        animation: true
+      })
+      .subscribe(res => {
+          this.joinStaffList = res.data;
+          const selected = this.activedStaffList;
+          this.joinStaffList.filter(el => selected.findIndex(item => item.userId === el.userId) > -1).forEach(el => {
+            el.choose = true;
           });
+      });
     }
   }
 
@@ -330,14 +334,16 @@ export class TrainExecuteComponent implements OnInit {
   }
 
   getStaffs() {
-    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${this.teams}&stationCode=${this.orgCode}`)
-            .subscribe(res => {
-                this.joinStaffList = res.data;
-                const selected = this.activedStaffList;
-                this.joinStaffList.filter(el => selected.findIndex(item => item.userId === el.userId) > -1).forEach(el => {
-                  el.choose = true;
-                });
-            });
+    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${this.teams}&stationCode=${this.orgCode}`, {
+      animation: true
+    })
+    .subscribe(res => {
+        this.joinStaffList = res.data;
+        const selected = this.activedStaffList;
+        this.joinStaffList.filter(el => selected.findIndex(item => item.userId === el.userId) > -1).forEach(el => {
+          el.choose = true;
+        });
+    });
   }
 
   chooseStaff(staff) {

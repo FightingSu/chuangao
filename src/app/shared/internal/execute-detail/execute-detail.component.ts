@@ -33,7 +33,10 @@ export class ExecuteDetailComponent implements OnInit {
   }
 
   getInfo(id) {
-    this.sharedService.get(`/Train/planGetById?id=${id}`)
+    this.sharedService
+      .get(`/Train/planGetById?id=${id}`, {
+        animation: true
+      })
       .subscribe(res => {
         this.trainPlanData = res.data.trainPlanData;
         res.data.trainDoListDataList.forEach(el => {

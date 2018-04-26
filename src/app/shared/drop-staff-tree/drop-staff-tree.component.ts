@@ -85,11 +85,13 @@ export class DropStaffTreeComponent implements OnInit, DoCheck {
   }
 
   getOrgInfo(orgCode) {
-    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${orgCode}`)
-      .subscribe(res => {
-        this.treeNodes = [];
-        this.toTreeNode(res.data);
-      });
+    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${orgCode}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.treeNodes = [];
+      this.toTreeNode(res.data);
+    });
   }
 
   getInit() {

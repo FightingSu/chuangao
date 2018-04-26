@@ -127,16 +127,18 @@ export class TrainPlanComponent implements OnInit {
     this.searchOrg = ($event);
   }
   getStaffInfo(staffId) {
-    this.sharedService.get(`/Train/planGetById?id=${staffId}`)
-            .subscribe(res => {
-                this.data = res.data.trainPlanData;
-                this.form.patchValue(this.data);
-                this.DoOrg = this.data.trainDoOrgList.join(',');
-                this.startDate = this.data.trainStartDate;
-                this.endDate = this.data.trainEndDate;
-                this.trainTimeLong = this.data.trainTimeLong;
-                this.filename = this.data.trainPlanFile;
-            });
+    this.sharedService.get(`/Train/planGetById?id=${staffId}`, {
+        animation: true
+      })
+      .subscribe(res => {
+          this.data = res.data.trainPlanData;
+          this.form.patchValue(this.data);
+          this.DoOrg = this.data.trainDoOrgList.join(',');
+          this.startDate = this.data.trainStartDate;
+          this.endDate = this.data.trainEndDate;
+          this.trainTimeLong = this.data.trainTimeLong;
+          this.filename = this.data.trainPlanFile;
+      });
   }
 
   timeFormat(num) {
@@ -221,11 +223,13 @@ export class TrainPlanComponent implements OnInit {
   }
 
   deletePlan(selectedUser) {
-    this.sharedService.get(`/Train/planDelete?id=${selectedUser}`)
-            .subscribe(res => {
-              this.sharedService.addAlert('通知', res.message);
-              this.toFirstPage();
-            });
+    this.sharedService.get(`/Train/planDelete?id=${selectedUser}`, {
+        animation: true
+      })
+      .subscribe(res => {
+        this.sharedService.addAlert('通知', res.message);
+        this.toFirstPage();
+      });
   }
 
   addStaff() {

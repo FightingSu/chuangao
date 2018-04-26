@@ -214,7 +214,9 @@ export class StaffEditComponent implements OnInit {
 
   staffLeave(selectedUser) {
     const leaveDate = this.sharedService.dateFormat(new Date());
-    this.sharedService.get(`/StaffMag/staffLeave?userId=${selectedUser}&leaveDate=${leaveDate}`)
+    this.sharedService.get(`/StaffMag/staffLeave?userId=${selectedUser}&leaveDate=${leaveDate}`, {
+      animation: true
+    })
             .subscribe(res => {
               this.sharedService.addAlert('警告', res.message);
               this.toFirstPage();
@@ -290,7 +292,7 @@ export class StaffEditComponent implements OnInit {
     const formdata = new FormData();
     formdata.append('file', this.file);
     formdata.append('userId', userId);
-    this.sharedService.post(`/upload/userInfo`, formdata, { 
+    this.sharedService.post(`/upload/userInfo`, formdata, {
       httpOptions: false
     })
       .subscribe(res => {
@@ -298,7 +300,7 @@ export class StaffEditComponent implements OnInit {
         this.file = null;
         this.filename = '';
         this.toFirstPage();
-      });
+      })
   }
 
   toFirstPage() {

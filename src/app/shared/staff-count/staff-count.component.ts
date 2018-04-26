@@ -31,7 +31,9 @@ export class StaffCountComponent implements OnInit {
   }
 
   getInfo(orgCode) {
-    this.sharedService.get(`/StaffMag/staffStatistics?orgCode=${orgCode}`)
+    this.sharedService.get(`/StaffMag/staffStatistics?orgCode=${orgCode}`, {
+      animation: true
+    })
       .subscribe(res => {
         this.updateOptions1 = {
           series: [{

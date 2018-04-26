@@ -97,10 +97,12 @@ export class DropOrgTreeComponent implements OnInit, DoCheck {
   }
 
   getOrgInfo(orgCode) {
-    this.sharedService.get(`/BaseInfo/getOrgRelation?orgCode=${orgCode}`)
-              .subscribe(res => {
-                this.toTreeNode(res.data);
-              });
+    this.sharedService.get(`/BaseInfo/getOrgRelation?orgCode=${orgCode}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.toTreeNode(res.data);
+    });
   }
 
   clear() {

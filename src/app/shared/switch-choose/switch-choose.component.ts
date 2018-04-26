@@ -61,7 +61,9 @@ export class SwitchChooseComponent implements OnInit, DoCheck {
 
   getSchedule() {
     this.loadingSchedule = true;
-    this.sharedServie.get(`/ShiftChange/getScheduleByTeams?stationCode=${this.orgCode}&teams=${this._teams}&userId=${this._userId}`)
+    this.sharedServie.get(`/ShiftChange/getScheduleByTeams?stationCode=${this.orgCode}&teams=${this._teams}&userId=${this._userId}`, {
+      animation: true
+    })
     .subscribe(res => {
               this.loadingSchedule = false;
               this.scheduleList = res.data;

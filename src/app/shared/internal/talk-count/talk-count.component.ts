@@ -62,15 +62,19 @@ export class TalkCountComponent implements OnInit {
   }
 
   getInfo() {
-    this.sharedService.get(`/Chat/getStatistics?stationCode=${this.orgList[0].data}&year=${this.year}&quarter=${this.quarter}`)
-      .subscribe(res => {
-        this.reasonList = res.data.reasonList;
-        this.updateChart(res.data.chatList);
-      });
+    this.sharedService.get(`/Chat/getStatistics?stationCode=${this.orgList[0].data}&year=${this.year}&quarter=${this.quarter}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.reasonList = res.data.reasonList;
+      this.updateChart(res.data.chatList);
+    });
   }
 
   getStaff() {
-    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`)
+    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`, {
+      animation: true
+    })
       .subscribe(res => {
         this.staffList = res.data;
       });

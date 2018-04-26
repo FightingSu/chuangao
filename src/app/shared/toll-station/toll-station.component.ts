@@ -31,7 +31,9 @@ export class TollStationComponent implements OnInit, OnDestroy {
   }
 
   getInfo(orgCode) {
-    this.sharedService.get(`/BaseInfo/getStationInfo?stationCode=${orgCode}`)
+    this.sharedService.get(`/BaseInfo/getStationInfo?stationCode=${orgCode}`, {
+      animation: true
+    })
             .subscribe(res => {
                 this.data = res.data;
                 this.imgArrLength1 = res.data.stationImg1.length;

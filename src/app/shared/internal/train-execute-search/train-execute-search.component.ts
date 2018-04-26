@@ -144,16 +144,20 @@ export class TrainExecuteSearchComponent implements OnInit {
 
   detail(id) {
     this.isChosen = true;
-    this.sharedService.get(`/Train/doGetById?id=${id}`)
-            .subscribe(res => {
-                this.doData = res.data;
-                this.doFilePath = res.data.trainDoFile;
-            });
-    this.sharedService.get(`/Train/planGetById?id=${id}`)
-            .subscribe(res => {
-                this.planData = res.data;
-                this.planFilePath = res.data.trainPlanFile;
-            });
+    this.sharedService.get(`/Train/doGetById?id=${id}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.doData = res.data;
+      this.doFilePath = res.data.trainDoFile;
+    });
+    this.sharedService.get(`/Train/planGetById?id=${id}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.planData = res.data;
+      this.planFilePath = res.data.trainPlanFile;
+    });
   }
 
   check($event) {

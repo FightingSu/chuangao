@@ -77,7 +77,7 @@ export class SharedService {
   }) {
     return Observable.create(obser => {
       let httpOptions: any = {};
-      if (options && options.animation) {
+      if (options.animation) {
         this.openLoadingAnimation();
       }
       if (options.httpOptions) {
@@ -90,14 +90,17 @@ export class SharedService {
               .subscribe(res => {
                 if (res.code) {
                   obser.next(res);
-                  if (options && options.animation) {
+                  if (options.animation) {
                     this.closeLoadingAnimation();
+                  }
+                  if (options.successAlert) {
+                    this.addAlert('通知', res.message);
                   }
                 }else {
                   this.addAlert('警告', res.message);
                 }
               }, error => {
-                if (options && options.animation) {
+                if (options.animation) {
                   this.closeLoadingAnimation();
                 }
                 this.addAlert('警告', '网络异常，请重试！');
@@ -105,30 +108,33 @@ export class SharedService {
     })
   }
 
-  get(path: string, options?: {
+  get(path: string, options: {
     successAlert?: boolean,
     animation?: boolean
   }) {
     return Observable.create(obser => {
-      if (options && options.animation) {
+      if (options.animation) {
         this.openLoadingAnimation();
       }
       this.http.get(this.ip + path)
               .map(res => res.json())
               .subscribe(res => {
                 if (res.code) {
-                  if (options && options.animation) {
+                  if (options.animation) {
                     this.closeLoadingAnimation();
+                  }
+                  if (options.successAlert) {
+                    this.addAlert('通知', res.message);
                   }
                   obser.next(res);
                 }else {
-                  if (options && options.animation) {
+                  if (options.animation) {
                     this.closeLoadingAnimation();
                   }
                   this.addAlert('警告', res.message);
                 }
               }, error => {
-                if (options && options.animation) {
+                if (options.animation) {
                   this.closeLoadingAnimation();
                 }
                 this.addAlert('警告', '网络异常，请重试！');

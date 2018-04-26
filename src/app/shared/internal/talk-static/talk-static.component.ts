@@ -123,10 +123,12 @@ export class TalkStaticComponent implements OnInit {
   }
 
   getStaff() {
-    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`)
-            .subscribe(res => {
-              this.staffList = res.data;
-            });
+    this.sharedService.get(`/BaseInfo/getStationUserId?stationCode=${this.orgList[0].data}`, {
+      animation: true
+    })
+    .subscribe(res => {
+      this.staffList = res.data;
+    });
   }
 
   ngOnInit() {

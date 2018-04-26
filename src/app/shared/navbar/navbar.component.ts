@@ -38,7 +38,9 @@ export class NavbarComponent implements OnInit {
 
   // 获取通知信息
   getNotification(orgCode, orgType) {
-    this.sharedService.get(`/BaseInfo/getNotification?orgCode=${orgCode}&orgType=${orgType}`)
+    this.sharedService.get(`/BaseInfo/getNotification?orgCode=${orgCode}&orgType=${orgType}`, {
+      animation: true
+    })
       .subscribe(res => {
         this.noteData = res.data;
         if (this.noteData) {

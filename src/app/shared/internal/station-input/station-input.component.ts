@@ -233,7 +233,7 @@ export class StationInputComponent implements OnInit {
                   if (this.file) {
                     this.upload(res.data.id);
                   }
-                
+
               });
     }
   }
@@ -293,7 +293,9 @@ export class StationInputComponent implements OnInit {
   }
 
   getStaffs() {
-    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${this.teams}&stationCode=${this.myOrgCode}`)
+    this.sharedService.get(`/ShiftChange/getUserByTeams?teams=${this.teams}&stationCode=${this.myOrgCode}`, {
+      animation: true
+    })
       .subscribe(res => {
           this.joinStaffList = res.data;
           const selected = this.activedStaffList;
@@ -359,7 +361,7 @@ export class StationInputComponent implements OnInit {
     const formdata = new FormData();
     formdata.append('file', this.file);
     formdata.append('id', userId);
-    this.sharedService.post(`/upload/stationMeeting`, formdata, 
+    this.sharedService.post(`/upload/stationMeeting`, formdata,
     {
       httpOptions: false,
       successAlert: true
