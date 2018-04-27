@@ -25,6 +25,7 @@ export class SwitchSearchComponent implements OnInit {
   size = 15;
   hasData = false;
   selectionMode = 'checkbox';
+  order: number;
   en = {
     firstDayOfWeek: 0,
     dayNames: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
@@ -58,19 +59,42 @@ export class SwitchSearchComponent implements OnInit {
       userName: new FormControl('', Validators.nullValidator)
     });
     this.cols = [
-      { field: 'orgName', header: '组织名称' },
-      { field: 'applyUserName', header: '换/顶班申请人' },
-      { field: 'applyTeamsCN', header: '换/顶班班组' },
-      { field: 'applyDate', header: '换/顶班日期' },
-      { field: 'applyShiftCN', header: '换/顶班班次' },
-      { field: 'applyChangeTypeCN', header: '排班类型' },
-      { field: 'backUserName', header: '替班收费员' },
-      { field: 'backTeams', header: '替班班组' },
-      { field: 'backDate', header: '替班日期' },
-      { field: 'backShift', header: '替班班次' },
-      { field: 'remark', header: '备注' },
-      { field: 'createTime', header: '登记时间' }
+      { field: 'orgName', header: '组织名称', sortItem: 'orgCode'},
+      { field: 'applyUserName', header: '换/顶班申请人', sortItem: 'applyUserName' },
+      { field: 'applyTeamsCN', header: '换/顶班班组', sortItem: 'applyTeams' },
+      { field: 'applyDate', header: '换/顶班日期', sortItem: 'applyDate' },
+      { field: 'applyShiftCN', header: '换/顶班班次', sortItem: 'applyShift' },
+      { field: 'applyChangeTypeCN', header: '排班类型', sortItem: 'applyChangeType' },
+      { field: 'backUserName', header: '替班收费员', sortItem: 'backUserName' },
+      { field: 'backTeamsCN', header: '替班班组', sortItem: 'backTeams' },
+      { field: 'backDate', header: '替班日期', sortItem: 'backDate' },
+      { field: 'backShiftCN', header: '替班班次', sortItem: 'backShift' },
+      { field: 'remark', header: '备注', sortItem: 'remark' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
+
+  tableSort(item) {
+    if (this.checkStation()) {
+      this.sortByThis(item);
+    }
   }
 
   dateFormat(date) {
@@ -88,12 +112,20 @@ export class SwitchSearchComponent implements OnInit {
     this.orgList = $event;
   }
 
-  submit() {
+  checkStation(): boolean {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构');
+      this.sharedService.addAlert('警告', '未选择机构！');
+      return false;
     }else if (this.orgList.filter(el => el.orgType !== 3).length > 0) {
-      alert('请选择收费站');
+      this.sharedService.addAlert('警告', '请选择收费站！');
+      return false;
     }else {
+      return true;
+    }
+  }
+
+  submit() {
+    if (this.checkStation()) {
       this.paginate({page: 0});
     }
   }
@@ -115,7 +147,8 @@ export class SwitchSearchComponent implements OnInit {
       }
     });
     this.sharedService.post('/ShiftChange/get', JSON.stringify(this.param) , {
-      httpOptions: true
+      httpOptions: true,
+      animation: true
     })
       .subscribe(res => {
         this.count = res.data.count;
@@ -152,8 +185,11 @@ export class SwitchSearchComponent implements OnInit {
           data: res.orgCode,
           orgType: res.orgType
         }];
+        if (this.orgType === 3) {
+          this.getInfo();
+        }
       }
-    });
+    }).unsubscribe();
   }
 
 }

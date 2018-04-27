@@ -20,11 +20,10 @@ export class StationSearchComponent implements OnInit {
   isChosen: boolean;
   doData: any = {};
   doFilePath: string;
-  orgType: string;
+  orgType: number;
+  order: number;
   orgList: Array<any>;
   planList: Array<any>;
-  page = 0;
-  size = 15;
   hasData = false;
   selectionMode = 'single';
   en = {
@@ -37,6 +36,10 @@ export class StationSearchComponent implements OnInit {
   };
   cols: any;
   checkItem: number;
+  param: any = {
+    page: 0,
+    size: 15
+  }
 
   constructor(
     private store: Store<any>,
@@ -48,15 +51,34 @@ export class StationSearchComponent implements OnInit {
     });
     this.isChosen = false;
     this.cols = [
-      { field: 'meetingName', header: '会议名称' },
-      { field: 'meetingPlace', header: '会议地点' },
-      { field: 'stationName', header: '所属机构' },
-      { field: 'meetingDate', header: '会议时间' },
-      { field: 'meetingHost', header: '主持人' },
-      { field: 'meetingNote', header: '记录人' },
+      { field: 'meetingName', header: '会议名称', sortItem: 'meetingName', sortable: true  },
+      { field: 'meetingPlace', header: '会议地点', sortItem: 'meetingPlace', sortable: true  },
+      { field: 'stationName', header: '所属机构', sortItem: 'stationName', sortable: true  },
+      { field: 'meetingDate', header: '会议时间', sortItem: 'meetingDate', sortable: true  },
+      { field: 'meetingHost', header: '主持人', sortItem: 'meetingHost', sortable: true  },
+      { field: 'meetingNote', header: '记录人', sortItem: 'meetingNote', sortable: true  },
       { field: 'meetingJoinPeople', header: '参与人员' },
-      { field: 'meetingContent', header: '会议内容' }
+      { field: 'meetingContent', header: '会议内容', sortItem: 'meetingContent', sortable: true  }
     ];
+  }
+
+  sortByThis(item) {
+    if (item.sortable) {
+      const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+      const prev_index = this.cols.findIndex(el => el.isSort);
+      if (this.param.column !== item.sortItem) {
+        this.param.column = item.sortItem;
+        this.order = 0;
+        if (prev_index > -1) {
+          this.cols[prev_index].isSort = false;
+        }
+        this.cols[index].isSort = true;
+      }else {
+        this.order = 1 - this.order;
+      }
+      this.param.order = this.order;
+      this.getInfo();
+    }
   }
 
   dateFormat(date) {
@@ -78,34 +100,36 @@ export class StationSearchComponent implements OnInit {
     if (!this.orgList || this.orgList.length === 0) {
       this.sharedService.addAlert('警告', '未选择机构');
     } else {
-      this.getInfo(this.page, this.size);
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.startDate = this.dateFormat(this.startDate);
     this.form.value.endDate = this.dateFormat(this.endDate);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    const param = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
-      param[el] = this.form.value[el];
+      this.param[el] = this.form.value[el];
     });
-    this.sharedService.post('/StationMeeting/get', JSON.stringify(param), {
-      httpOptions: true
+    this.sharedService.post('/StationMeeting/get', JSON.stringify(this.param), {
+      httpOptions: true,
+      animation: true,
+      lock: true
     })
       .subscribe(res => {
         this.count = res.data.count;
         if (res.data.count > 0) {
           this.hasData = true;
         }
+        res.data.stationMeetingDataList.forEach(el => {
+          el.meetingJoinPeople = el.meetingJoinPeople.map(item => item.userName).join(',');
+        })
         this.planList = res.data.stationMeetingDataList;
       });
   }
@@ -140,8 +164,11 @@ export class StationSearchComponent implements OnInit {
         this.orgList = [{
           data: res.orgCode
         }];
+        if (this.orgType === 3) {
+          this.getInfo();
+        }
       }
-    });
+    }).unsubscribe();
   }
 
 }

@@ -115,7 +115,7 @@ export class ContactComponent implements OnInit {
       if (res && res.orgType === 3) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 }

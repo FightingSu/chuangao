@@ -35,7 +35,7 @@ export class SidebarComponent implements OnInit {
       if (res) {
         this.orgType = res.orgType;
       }
-    });
+    }).unsubscribe();
   }
 
 }

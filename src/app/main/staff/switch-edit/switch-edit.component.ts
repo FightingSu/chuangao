@@ -22,8 +22,6 @@ export class SwitchEditComponent implements OnInit {
   file: any;
   login: Observable<any> = new Observable<any>();
   orgCode: string;
-  page = 0;
-  size = 15;
   count: number;
   selectedSwitchId: string;
   applyStaffList: Array<any>;
@@ -34,9 +32,10 @@ export class SwitchEditComponent implements OnInit {
   searchName: string;
   orgType: number;
   initForm: any;
+  order: number;
   param: any = {
-    page: this.page,
-    size: this.size
+    page: 0,
+    size: 15
   };
   applyDate: string;
   applyDateEnd: string;
@@ -87,18 +86,18 @@ export class SwitchEditComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'orgName', header: '组织名称' },
-      { field: 'applyUserName', header: '换/顶班申请人' },
-      { field: 'applyTeamsCN', header: '换/顶班班组' },
-      { field: 'applyDate', header: '换/顶班日期' },
-      { field: 'applyShiftCN', header: '换/顶班班次' },
-      { field: 'backUserName', header: '替班收费员' },
-      { field: 'backTeamsCN', header: '替班班组' },
-      { field: 'backCN', header: '换班方式' },
-      { field: 'backDate', header: '替班日期' },
-      { field: 'backShiftCN', header: '替班班次' },
-      { field: 'remark', header: '备注' },
-      { field: 'createTime', header: '登记时间' }
+      // { field: 'orgName', header: '组织名称', sortItem: 'orgCode' },
+      { field: 'applyUserName', header: '换/顶班申请人', sortItem: 'applyUserName' },
+      { field: 'applyTeamsCN', header: '换/顶班班组', sortItem: 'applyTeams' },
+      { field: 'applyDate', header: '换/顶班日期', sortItem: 'applyDate' },
+      { field: 'applyShiftCN', header: '换/顶班班次', sortItem: 'applyShift' },
+      { field: 'backUserName', header: '替班收费员', sortItem: 'backUserName' },
+      { field: 'backTeamsCN', header: '替班班组', sortItem: 'backTeams' },
+      { field: 'backCN', header: '换班方式', sortItem: 'backTeams' },
+      { field: 'backDate', header: '替班日期', sortItem: 'backDate' },
+      { field: 'backShiftCN', header: '替班班次', sortItem: 'backShift' },
+      { field: 'remark', header: '备注', sortItem: 'remark' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' }
     ];
     this.initForm = {
       applyTeams: 0,
@@ -107,6 +106,23 @@ export class SwitchEditComponent implements OnInit {
       backShift: 0,
       remark: ''
     };
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   getSwitchInfo(leaveId) {
@@ -142,7 +158,8 @@ export class SwitchEditComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
     ).subscribe(
       res => {
@@ -490,7 +507,7 @@ export class SwitchEditComponent implements OnInit {
         this.param.applyChangeType = 1;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

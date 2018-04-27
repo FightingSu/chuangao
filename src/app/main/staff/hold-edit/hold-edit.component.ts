@@ -27,8 +27,6 @@ export class HoldEditComponent implements OnInit {
   isChosen = false;
   login: Observable<any> = new Observable<any>();
   orgCode: string;
-  page = 0;
-  size = 15;
   count: number;
   holdList: Array<any>;
   staffList: Array<any>;
@@ -40,9 +38,10 @@ export class HoldEditComponent implements OnInit {
   searchName: string;
   orgType: number;
   initForm: any;
+  order: number;
   param: any = {
-    page: this.page,
-    size: this.size,
+    page: 0,
+    size: 15,
     applyChangeType: 2
   };
 
@@ -67,11 +66,11 @@ export class HoldEditComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'orgName', header: '组织名称' },
-      { field: 'applyUserName', header: '顶班申请人' },
-      { field: 'applyTeamsCN', header: '顶班班组' },
-      { field: 'applyDate', header: '顶班日期' },
-      { field: 'createTime', header: '登记时间' }
+      // { field: 'orgName', header: '组织名称', sortItem: 'orgCode' },
+      { field: 'applyUserName', header: '顶班申请人', sortItem: 'applyUserName' },
+      { field: 'applyTeamsCN', header: '顶班班组', sortItem: 'applyTeams' },
+      { field: 'applyDate', header: '顶班日期', sortItem: 'applyDate' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' }
     ];
     this.initForm = {
       applyUserId: '',
@@ -79,6 +78,23 @@ export class HoldEditComponent implements OnInit {
       shiftId: '',
       remark: ''
     };
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   getLeaveInfo(leaveId) {
@@ -97,7 +113,8 @@ export class HoldEditComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
     ).subscribe(
       res => {
@@ -291,7 +308,7 @@ export class HoldEditComponent implements OnInit {
         this.getInfo();
         this.getStaff();
       }
-    });
+    }).unsubscribe();
   }
 
 }

@@ -26,8 +26,6 @@ export class LeaveEditComponent implements OnInit {
   isChosen = false;
   login: Observable<any> = new Observable<any>();
   orgCode: string;
-  page = 0;
-  size = 15;
   count: number;
   leaveList: Array<any>;
   staffList: Array<any>;
@@ -39,9 +37,10 @@ export class LeaveEditComponent implements OnInit {
   searchName: string;
   orgType: number;
   initForm: any;
+  order: number;
   param: any = {
-    page: this.page,
-    size: this.size
+    page: 0,
+    size: 15
   };
 
   constructor(
@@ -64,18 +63,35 @@ export class LeaveEditComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'orgName', header: '组织机构' },
-      { field: 'userName', header: '请假人' },
-      { field: 'applyTypeCN', header: '请假类型' },
-      { field: 'applyDate', header: '开始请假时间' },
-      { field: 'applyDateEnd', header: '结束请假时间' },
-      { field: 'remark', header: '请假理由' },
-      { field: 'createTime', header: '登记时间' }
+      // { field: 'orgName', header: '组织机构', sortItem: 'orgCode' },
+      { field: 'userName', header: '请假人', sortItem: 'userName' },
+      { field: 'applyTypeCN', header: '请假类型', sortItem: 'applyType' },
+      { field: 'applyDate', header: '开始请假时间', sortItem: 'applyDate' },
+      { field: 'applyDateEnd', header: '结束请假时间', sortItem: 'applyDateEnd' },
+      { field: 'remark', header: '请假理由', sortItem: 'remark' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' }
     ];
     this.initForm = {
       userId: '',
       leaveType: '-1'
     };
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   getLeaveInfo(leaveId) {
@@ -95,10 +111,11 @@ export class LeaveEditComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
-    ).subscribe(
-      res => {
+    ).subscribe(res => {
+      if (res) {
         this.count = res.data.count;
         if (res.data.count > 0) {
           this.hasData = true;
@@ -108,7 +125,7 @@ export class LeaveEditComponent implements OnInit {
           });
         }
       }
-    )
+    })
   }
 
   fileChange($event) {
@@ -185,7 +202,7 @@ export class LeaveEditComponent implements OnInit {
         this.toFirstPage();
       }
     )
-    
+
   }
 
   addStaffLeave() {
@@ -316,7 +333,7 @@ export class LeaveEditComponent implements OnInit {
         this.getInfo();
         this.getStaff();
       }
-    });
+    }).unsubscribe();
   }
 
 }

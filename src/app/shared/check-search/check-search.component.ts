@@ -80,9 +80,9 @@ export class CheckSearchComponent implements OnInit {
 
   submit() {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构');
+      this.sharedService.addAlert('警告', '请选择机构！');
     }else if (this.orgList.filter(el => el.orgType !==3).length) {
-      alert('请选择收费站！');
+      this.sharedService.addAlert('警告', '请选择收费站！');
     }else {
       this.getInfo(this.page, this.size);
     }
@@ -137,7 +137,7 @@ export class CheckSearchComponent implements OnInit {
           orgType: this.orgType
         }];
       }
-    });
+    }).unsubscribe();
     const year = (new Date()).getFullYear();
 
     for (let i = 0; i < 10; i++) {

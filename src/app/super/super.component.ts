@@ -228,7 +228,7 @@ export class SuperComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getOrgInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

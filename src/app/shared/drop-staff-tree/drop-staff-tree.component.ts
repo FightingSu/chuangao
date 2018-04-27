@@ -117,7 +117,7 @@ export class DropStaffTreeComponent implements OnInit, DoCheck {
         this.orgCode = res.orgCode;
         this.getOrgInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     this.selected = this.selected || '';
     this.initArr = this.selected.split(',');
   }

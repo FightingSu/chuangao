@@ -41,6 +41,7 @@ export class TalkInputComponent implements OnInit {
   selectionStaffMode = 'checkbox';
   searchOrg: Array<any>;
   initForm: any;
+  order: number;
   param: any = {
     page: this.page,
     size: this.size
@@ -71,13 +72,13 @@ export class TalkInputComponent implements OnInit {
     this.login = store.select('login');
     this.initstaff = '';
     this.cols = [
-      { field: 'orgName', header: '单位名称' },
-      { field: 'chatType', header: '谈心类型' },
-      { field: 'chatLeader', header: '谈心人员' },
-      { field: 'chatUserName', header: '谈心对象' },
-      { field: 'chatLoc', header: '谈心地点' },
-      { field: 'chatDate', header: '谈心时间' },
-      { field: 'chatContent', header: '概要内容' }
+      // { field: 'orgName', header: '单位名称', sortItem: 'chatLeader' },
+      { field: 'chatType', header: '谈心类型', sortItem: 'chatType' },
+      { field: 'chatLeader', header: '谈心人员', sortItem: 'chatLeader' },
+      { field: 'chatUserName', header: '谈心对象', sortItem: 'chatUserName' },
+      { field: 'chatLoc', header: '谈心地点', sortItem: 'chatLoc' },
+      { field: 'chatDate', header: '谈心时间', sortItem: 'chatDate' },
+      { field: 'chatContent', header: '概要内容', sortItem: 'chatContent' }
     ];
     this.initForm = {
       chatLeader: '',
@@ -94,6 +95,23 @@ export class TalkInputComponent implements OnInit {
     }else {
       this.sharedService.addAlert('警告', '请选择一条记录！');
     }
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   selectedOrg($event) {
@@ -239,7 +257,7 @@ export class TalkInputComponent implements OnInit {
                   this.toFirstPage();
                   this.sharedService.addAlert('通知', res.message);
                 }
-              
+
             });
   }
 
@@ -289,6 +307,6 @@ export class TalkInputComponent implements OnInit {
         this.orgName = res.orgName;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }

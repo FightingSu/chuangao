@@ -103,7 +103,7 @@ export class NavbarComponent implements OnInit {
         }
         this.role = `${orgTypeDes}${res.isAdmin ? '管理员' : '普通'}账号`;
       }
-    });
+    }).unsubscribe();
   }
 
 }

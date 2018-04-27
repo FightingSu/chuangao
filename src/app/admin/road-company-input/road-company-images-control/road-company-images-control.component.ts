@@ -51,15 +51,17 @@ export class RoadCompanyImagesControlComponent implements OnInit {
   }
 
   delete(id) {
-    this.sharedService.get(
-      `/BaseInfo/deleteOrgPic?fileId=${id}`,
-      {
-        successAlert: true,
-        animation: true
-      }
-    ).subscribe(
-      res => this.getImages(this.orgCode)
-    )
+    this.sharedService.addConfirm('警告', '确认删除该图片？').subscribe(res => {
+      this.sharedService.get(
+        `/BaseInfo/deleteOrgPic?fileId=${id}`,
+        {
+          successAlert: true,
+          animation: true
+        }
+      ).subscribe(
+        res => this.getImages(this.orgCode)
+      )
+    })
   }
 
   ngOnInit() {
@@ -68,7 +70,7 @@ export class RoadCompanyImagesControlComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getImages(res.orgCode);
       }
-    });
+    }).unsubscribe();
   }
 
 }

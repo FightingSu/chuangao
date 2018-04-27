@@ -19,6 +19,7 @@ export class GreenCheckComponent implements OnInit {
   login: Observable<any> = new Observable<any>();
   form: FormGroup;
   dateTime: string;
+  order: number;
   param: any = {
     page: 0,
     size: 15
@@ -46,25 +47,42 @@ export class GreenCheckComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'carNo', header: '车牌号' },
-      { field: 'boxTypeCN', header: '车型' },
-      { field: 'carTypeCN', header: '轴型' },
-      { field: 'goods', header: '货物' },
-      { field: 'entryName', header: '入口路段' },
-      { field: 'entryStation', header: '入口站' },
-      { field: 'exportName', header: '出口路段' },
-      { field: 'exportStation', header: '出口站' },
-      { field: 'shiftCN', header: '班次' },
-      { field: 'firstCheckCN', header: '初检结果' },
-      { field: 'dealResultCN', header: '放行方式' },
-      { field: 'money', header: '免/缴金额(元)' },
-      { field: 'shiftCar', header: '出口车道' }
+      { field: 'carNo', header: '车牌号', sortItem: 'carNo' },
+      { field: 'boxTypeCN', header: '车型', sortItem: 'boxType' },
+      { field: 'carTypeCN', header: '轴型', sortItem: 'carType' },
+      { field: 'goods', header: '货物', sortItem: 'goods' },
+      { field: 'entryName', header: '入口路段', sortItem: 'entryName' },
+      { field: 'entryStation', header: '入口站', sortItem: 'entryStation' },
+      { field: 'exportName', header: '出口路段', sortItem: 'exportName' },
+      { field: 'exportStation', header: '出口站', sortItem: 'exportStation' },
+      { field: 'shiftCN', header: '班次', sortItem: 'shift' },
+      { field: 'firstCheckCN', header: '初检结果', sortItem: 'firstCheck' },
+      { field: 'dealResultCN', header: '放行方式', sortItem: 'dealResult' },
+      { field: 'money', header: '免/缴金额(元)', sortItem: 'money' },
+      { field: 'shiftCar', header: '出口车道', sortItem: 'shiftCar' }
     ];
     this.form = new FormGroup({
       shift: new FormControl('-1', Validators.nullValidator),
       firstCheck: new FormControl('-1', Validators.nullValidator),
       carNo: new FormControl('', Validators.nullValidator)
     });
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   dateFormat(date) {
@@ -97,7 +115,8 @@ export class GreenCheckComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
     ).subscribe(
       res => {
@@ -131,7 +150,7 @@ export class GreenCheckComponent implements OnInit {
         this.param.stationCode = res.orgCode;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

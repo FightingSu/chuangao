@@ -28,8 +28,11 @@ export class TalkSearchComponent implements OnInit {
   trainWay: string;
   trainType: string;
   trainPlanName: string;
-  page = 0;
-  size = 15;
+  order: number;
+  param: any = {
+    page: 0,
+    size: 15
+  }
   hasData = false;
   selectionMode = 'single';
   en = {
@@ -52,13 +55,30 @@ export class TalkSearchComponent implements OnInit {
     });
     this.isChosen = false;
     this.cols = [
-      { field: 'orgName', header: '单位名称' },
-      { field: 'chatLeader', header: '谈心人员' },
-      { field: 'chatType', header: '谈心类型' },
-      { field: 'chatLoc', header: '谈心地点' },
-      { field: 'chatDate', header: '谈心时间' },
-      { field: 'chatContent', header: '概要内容' }
+      // { field: 'orgName', header: '单位名称', sortItem: 'orgName' },
+      { field: 'chatLeader', header: '谈心人员', sortItem: 'chatLeader' },
+      { field: 'chatType', header: '谈心类型', sortItem: 'chatType' },
+      { field: 'chatLoc', header: '谈心地点', sortItem: 'chatLoc' },
+      { field: 'chatDate', header: '谈心时间', sortItem: 'chatDate' },
+      { field: 'chatContent', header: '概要内容', sortItem: 'chatContent' }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   dateFormat(date) {
@@ -80,30 +100,29 @@ export class TalkSearchComponent implements OnInit {
     if (!this.orgList || this.orgList.length === 0) {
       this.sharedService.addAlert('警告', '未选择机构！');
     } else {
-      this.getInfo(this.page, this.size);
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.chatStartDate = this.dateFormat(this.startTime);
     this.form.value.chatEndDate = this.dateFormat(this.endTime);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    const param = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (this.form.value[el] || this.form.value[el] === 0) {
-        param[el] = this.form.value[el];
+        this.param[el] = this.form.value[el];
       }
     });
-    this.sharedService.post('/Chat/get', JSON.stringify(param) , {
-      httpOptions: true
+    this.sharedService.post('/Chat/get', JSON.stringify(this.param) , {
+      httpOptions: true,
+      animation: true,
+      lock: true
     })
       .subscribe(res => {
         this.count = res.data.count;
@@ -146,8 +165,9 @@ export class TalkSearchComponent implements OnInit {
         this.orgList = [{
           data: res.orgCode
         }];
+        this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

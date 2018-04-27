@@ -166,7 +166,7 @@ export class TalkCountComponent implements OnInit {
           this.getInfo();
         }
       }
-    });
+    }).unsubscribe();
 
     const year = (new Date()).getFullYear();
     for (let i = 0; i < 10; i++) {

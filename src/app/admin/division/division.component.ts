@@ -40,7 +40,7 @@ export class DivisionComponent implements OnInit {
       }else if (res && res.orgType === 1 && /division/.test(this.router.url)) {
         this.getInfo(this.route.snapshot.queryParams['orgCode']);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 

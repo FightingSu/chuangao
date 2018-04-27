@@ -8,7 +8,7 @@
           <div class="form-item">
             <p>组织机构</p>
             <div *ngIf="orgType !== 3" class="tree-container">
-              <app-drop-org-tree [selectionMode]="selectionMode" (selectedOrg)="selectedOrg($event)"></app-drop-org-tree>
+              <app-drop-org-tree [selectionMode]="selectionMode" (selectedOrg)="selectedOrg($event)" [initOrgName]="orgName"></app-drop-org-tree>
             </div>
             <div class="orgName-container" *ngIf="orgType === 3">{{orgName}}</div>
           </div>
@@ -48,7 +48,7 @@
             <table class="myTable">
               <thead>
                 <tr>
-                  <th *ngFor="let field of cols">{{field.header}}</th>
+                  <th *ngFor="let field of cols" class="sortable" [class.forward]="field.isSort && order === 0" [class.reverse]="field.isSort && order === 1" (click)="tableSort(field)">{{field.header}}</th>
                 </tr>
               </thead>
               <tbody>

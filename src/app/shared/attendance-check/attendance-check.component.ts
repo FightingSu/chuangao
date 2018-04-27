@@ -50,13 +50,13 @@ export class AttendanceCheckComponent implements OnInit {
 
   search() {
     if (!this.orgList || this.orgList.length <= 0) {
-      alert('请选择机构！');
+      this.sharedService.addAlert('警告', '请选择机构！');
     } else if (this.orgList[0].orgType !== 3) {
-      alert('请选择收费站！');
+      this.sharedService.addAlert('警告', '请选择收费站！')
     } else if (!this.year) {
-      alert('请选择年份！');
+      this.sharedService.addAlert('警告', '请选择年份！');
     } else if (!this.staff) {
-      alert('请选择人员！');
+      this.sharedService.addAlert('警告', '请选择人员！');
     } else {
       this.getInfo();
     }
@@ -203,7 +203,7 @@ export class AttendanceCheckComponent implements OnInit {
         }];
         this.getStaff();
       }
-    });
+    }).unsubscribe();
 
     const year = (new Date()).getFullYear();
     const xAxisData: any = [];

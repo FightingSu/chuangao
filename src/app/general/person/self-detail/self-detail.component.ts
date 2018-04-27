@@ -48,6 +48,6 @@ export class SelfDetailComponent implements OnInit {
       if (res) {
         this.getInfo(res.userId);
       }
-    });
+    }).unsubscribe();
   }
 }

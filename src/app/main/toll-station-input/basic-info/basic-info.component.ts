@@ -17,19 +17,21 @@ export class BasicInfoComponent implements OnInit {
   keys: Array<string>;
   data: any;
   requiredItems = {
-    shortName: '简称',
-    organizationCode: '组织机构代码',
-    level: '公司级别',
-    address: '地址',
-    contacts: '联系人',
-    phoneNo: '联系电话',
-    briefIntro: '公司简介',
-    status: '启用状态',
-    totalMileage: '所辖路段里程（单位：公里）',
+    // status: '启用状态',
     longitude: '经度',
     latitude: '纬度',
     stationClass: '收费站类别',
-    stationUsedName: '曾用名'
+    stationUsedName: '曾用名',
+    stationDirection: '收费站方向',
+    stationType: '收费站类型',
+    belongToRegion: '行政区域',
+    stationPileNumber: '收费站桩号',
+    stationCode: '收费站编码',
+    stationName: '收费站名称',
+    areaCovere: '占地面积（平方米）',
+    floorArea: '建筑面积（平方米）',
+    monitoringRoomArea: '监控室面积（平方米）',
+    staffNumber: '收费站人数（个）'
   };
 
   constructor(
@@ -74,6 +76,7 @@ export class BasicInfoComponent implements OnInit {
 
   submit() {
     const spaceArr = this.keys.filter(el => !this.form.value[el] && this.form.value[el] !== 0).map(el => this.requiredItems[el]);
+    console.log(this.keys.filter(el => !this.form.value[el] && this.form.value[el] !== 0));
     if (spaceArr.length > 0) {
       this.sharedService.addAlert('警告', `${spaceArr.join(',')}为空`);
     }else {
@@ -109,7 +112,7 @@ export class BasicInfoComponent implements OnInit {
       if (res && res.orgType === 3) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 }

@@ -4,7 +4,7 @@
     <div class="basic-info part-container">
       <h1 class="part-title">培训信息</h1>
       <div class="flexBox">
-        <button (click)="download()" *ngIf="planData.trainPlanFile && planData.trainPlanFile !== ''">下载计划附件</button>
+        <a [attr.href]="planData.trainPlanFile" target="_blank" *ngIf="planData.trainPlanFile && planData.trainPlanFile !== ''">下载计划附件</a>
         <button (click)="isChosen = !isChosen">返回</button>
       </div>
       <div class="basic-items part-content">
@@ -87,7 +87,7 @@
                 <tr>
                   <th>操作</th>
                   <th>操作</th>
-                  <th *ngFor="let field of cols">{{field.header}}</th>
+                  <th *ngFor="let field of cols" class="sortable" [class.forward]="field.isSort && order === 0" [class.reverse]="field.isSort && order === 1" (click)="sortByThis(field)">{{field.header}}</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,7 +99,7 @@
               </tbody>
             </table>
           </div>
-          <p-paginator *ngIf="hasData" [rows]="size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
+          <p-paginator *ngIf="hasData" [rows]="param.size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
         </div>
       </div>
     </div>

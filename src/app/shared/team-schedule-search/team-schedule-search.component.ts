@@ -118,9 +118,9 @@ export class TeamScheduleSearchComponent implements OnInit {
 
   submit() {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构');
+      this.sharedService.addAlert('警告', '请选择机构！');
     }else if (this.orgList.filter(el => el.orgType !== 3).length > 0) {
-      alert('请选择收费站');
+      this.sharedService.addAlert('警告', '请选择收费站！');
     }else {
       this.calendarInit(this.now);
       this.getInfo();
@@ -252,7 +252,7 @@ export class TeamScheduleSearchComponent implements OnInit {
           orgType: res.orgType
         }];
       }
-    });
+    }).unsubscribe();
   }
 
 }

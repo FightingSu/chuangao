@@ -193,7 +193,7 @@ export class DocUploadComponent implements OnInit {
 
   staffLeave(selectedUser) {
     const leaveDate = this.dateFormat(new Date());
-    this.sharedService.get(`/FileManager/delete?id=${selectedUser}`, 
+    this.sharedService.get(`/FileManager/delete?id=${selectedUser}`,
     {successAlert: true, animation: true})
             .subscribe(res => {
               this.sharedService.addAlert('通知', res.message);
@@ -318,6 +318,6 @@ export class DocUploadComponent implements OnInit {
         this.initForm.fileUnit = this.orgList[0].label;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }

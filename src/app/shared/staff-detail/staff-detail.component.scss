@@ -131,6 +131,21 @@
   padding: 20px;
 }
 
+.return-btn{
+  width: 100px;
+  height: 30px;
+  border: none;
+  border-radius: 10px;
+  background: #6c9cff;
+  margin: auto;
+  margin-bottom: 20px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  outline: none !important;
+  display: block;
+}
+
 .userName{
   background: url('/assets/images/staff-basic-userName.png') no-repeat 0 center;
 }

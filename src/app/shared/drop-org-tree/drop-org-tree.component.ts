@@ -129,7 +129,7 @@ export class DropOrgTreeComponent implements OnInit, DoCheck {
       if (res && res.isAdmin !== 2) {
         this.getOrgInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     this.selected = this.selected || '';
     this.initArr = this.selected.split(',');
   }

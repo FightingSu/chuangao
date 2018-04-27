@@ -43,7 +43,7 @@ export class AdminSidebarComponent implements OnInit {
         this.orgLink = this.orgLinks[res.orgType - 1];
         this.orgInputLink = this.orgInputLinks[res.orgType - 1];
       }
-    });
+    }).unsubscribe();
   }
 
 }

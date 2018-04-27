@@ -20,6 +20,10 @@ export class ExecuteSingleDetailComponent implements OnInit {
 
   }
 
+  goBack() {
+    window.history.back();
+  }
+
   ngOnInit() {
     const data = window.sessionStorage.getItem('execute');
     this.id = this.route.snapshot.queryParams['id'];

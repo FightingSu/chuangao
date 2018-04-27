@@ -46,7 +46,6 @@ export class GoodsSearchComponent implements OnInit {
         this.dataArr.array.forEach(el => {
           el.children = res.data.filter(item => item.pCode === el.code);
         });
-        console.log(this.dataArr);
       }
     )
   }

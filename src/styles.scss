@@ -19,7 +19,7 @@ div{
   box-sizing: content-box;
 }
 
-*{user-select:none;}
+// *{user-select:none;}
 
 .page-title{
   font-size: 14px;
@@ -154,3 +154,43 @@ div{
   background: rgba(0, 0, 0, 0.3) url('/assets/images/liubi-loading.gif') no-repeat center center;
 }
 
+
+th{
+  position: relative;
+
+  &.sortable{
+    cursor: pointer;
+  }
+
+  &.forward::after{
+    content: '';
+    height: 0;
+    display: block;
+    width: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 15px;
+    margin: auto;
+    border-top: 5px solid #6c9cff;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: none;
+  }
+
+  &.reverse::after{
+    content: '';
+    height: 0;
+    display: block;
+    width: 0;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 15px;
+    margin: auto;
+    border-bottom: 5px solid #6c9cff;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: none;
+  }
+}

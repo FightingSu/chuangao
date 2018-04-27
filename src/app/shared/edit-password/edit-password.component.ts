@@ -29,10 +29,9 @@ export class EditPasswordComponent implements OnInit {
   ngOnInit() {
     this.login.subscribe(res => {
       if (res) {
-        console.log('res: ', res);
         this.userData = res;
       }
-    });
+    }).unsubscribe();
   }
 
   oldPasswordChanged() {
@@ -93,13 +92,13 @@ export class EditPasswordComponent implements OnInit {
     if (!this.checkForm()) {
       return;
     }
-    console.log('userData: ', this.userData);
     const params = this.getParams();
     this.sharedService.post(`/updatePassword`, JSON.stringify(params), {
-      httpOptions: true
+      httpOptions: true,
+      successAlert: true,
+      animation: true
     })
       .subscribe(res => {
-          alert(res.message);
           this.logout();
       });
   }

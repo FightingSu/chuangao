@@ -26,8 +26,11 @@ export class TrainExecuteSearchComponent implements OnInit {
   planFilePath: string;
   trainDoOrgList: Array<any>;
   login: Observable<any> = new Observable<any>();
-  page = 0;
-  size = 15;
+  order: number;
+  param: any ={
+    page: 0,
+    size: 15
+  }
   isChosen: boolean;
   selectionMode = 'single';
   hasData = false;
@@ -59,18 +62,35 @@ export class TrainExecuteSearchComponent implements OnInit {
     this.planFilePath = '';
     this.isChosen = false;
     this.cols = [
-      { field: 'trainPlanName', header: '培训计划名称' },
-      { field: 'trainPlanOrgName', header: '发起单位' },
-      { field: 'trainDoOrgName', header: '落实单位' },
-      { field: 'hasDo', header: '落实状态' },
-      { field: 'trainPlanStartDate', header: '计划开始时间' },
-      { field: 'trainPlanEndDate', header: '计划结束时间' },
-      { field: 'trainWay', header: '培训方式' },
-      { field: 'trainType', header: '培训类别' },
-      { field: 'trainPlanTeacher', header: '培训讲师' },
-      { field: 'trainPlanTimeLong', header: '培训课时' },
-      { field: 'trainPlanLoc', header: '培训地点' }
+      { field: 'trainPlanName', header: '培训计划名称', sortItem: 'trainPlanName' },
+      { field: 'trainPlanOrgName', header: '发起单位', sortItem: 'trainPlanOrgName' },
+      { field: 'trainDoOrgName', header: '落实单位', sortItem: 'trainDoOrgName' },
+      { field: 'hasDo', header: '落实状态', sortItem: 'hasDo' },
+      { field: 'trainPlanStartDate', header: '计划开始时间', sortItem: 'trainPlanStartDate' },
+      { field: 'trainPlanEndDate', header: '计划结束时间', sortItem: 'trainPlanEndDate' },
+      // { field: 'trainWay', header: '培训方式', sortItem: 'trainWay' },
+      // { field: 'trainType', header: '培训类别', sortItem: 'trainType' },
+      // { field: 'trainPlanTeacher', header: '培训讲师', sortItem: 'trainPlanTeacher' },
+      // { field: 'trainPlanTimeLong', header: '培训课时', sortItem: 'trainPlanTimeLong' },
+      // { field: 'trainPlanLoc', header: '培训地点', sortItem: 'trainPlanLoc' }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   dateFormat(date) {
@@ -98,12 +118,13 @@ export class TrainExecuteSearchComponent implements OnInit {
     } else if (!this.trainDoOrgList || this.trainDoOrgList.length === 0) {
       this.sharedService.addAlert('警告','未选择落实单位！');
     } else {
-      this.getInfo(this.page, this.size);
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
   download(type) {
     if (type === 'do') {
@@ -112,22 +133,20 @@ export class TrainExecuteSearchComponent implements OnInit {
       window.open(this.planFilePath);
     }
   }
-  getInfo(page: number, size: number) {
+  getInfo() {
     // this.form.value.trainStartDate = this.dateFormat(this.startTime);
     // this.form.value.trainEndDate = this.dateFormat(this.endTime);
     this.form.value.hasDo = +this.form.value.hasDo;
     this.form.value.orgList = this.orgList.map(el => el.data);
     // this.form.value.trainDoOrgList = this.trainDoOrgList.map(el => el.data);
-    const param = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
-      param[el] = this.form.value[el];
+      this.param[el] = this.form.value[el];
     });
-    this.sharedService.post('/Train/doGet', JSON.stringify(param), {
-      httpOptions: true
+    this.sharedService.post('/Train/doGet', JSON.stringify(this.param), {
+      httpOptions: true,
+      animation: true,
+      lock: true
     })
       .subscribe(res => {
         this.count = res.data.count;
@@ -173,9 +192,9 @@ export class TrainExecuteSearchComponent implements OnInit {
       if (res && res.isAdmin) {
         this.orgList = [{data: res.orgCode, label: res.orgName}];
         this.trainDoOrgList = [{data: res.orgCode, label: res.orgName}];
-        this.getInfo(this.page, this.size);
+        this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

@@ -12,7 +12,7 @@ import { SharedService } from '../../service/shared-service.service';
   templateUrl: './toll-station.component.html',
   styleUrls: ['./toll-station.component.scss']
 })
-export class TollStationComponent implements OnInit, OnDestroy {
+export class TollStationComponent implements OnInit {
   data: any = {};
   login: Observable<any> = new Observable<any>();
   fullfilledSubscription: Subscription;
@@ -54,20 +54,17 @@ export class TollStationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.fullfilledSubscription = this.login.subscribe(res => {
+    this.login.subscribe(res => {
       if (res && res.orgType === 3) {
         this.getInfo(res.orgCode);
       }else if (res && res.orgType !== 3 && /tollStation/.test(this.router.url)) {
         this.getInfo(this.route.snapshot.queryParams['orgCode']);
       }
-    });
+    }).unsubscribe();
+
     setInterval(() => {
       this.activedImg++;
     }, 3000);
-  }
-
-  ngOnDestroy() {
-    this.fullfilledSubscription.unsubscribe();
   }
 
 }

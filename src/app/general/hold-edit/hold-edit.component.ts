@@ -126,7 +126,7 @@ export class HoldEditComponent implements OnInit {
         this.param.applyUserId = res.userId;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

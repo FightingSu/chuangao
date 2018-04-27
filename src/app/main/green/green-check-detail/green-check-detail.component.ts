@@ -88,7 +88,7 @@ export class GreenCheckDetailComponent implements OnInit {
       if (res) {
         this.orgType = res.orgType;
       }
-    });
+    }).unsubscribe();
     this.id = this.route.snapshot.queryParams['id'];
     this.getInfo();
   }

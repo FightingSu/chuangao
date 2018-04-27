@@ -37,7 +37,7 @@ export class DeviceSearchComponent implements OnInit {
   };
   cols: any;
   checkItem: number;
-  
+
   constructor(
     private store: Store<any>,
     private sharedService: SharedService
@@ -132,7 +132,7 @@ export class DeviceSearchComponent implements OnInit {
         this.orgList = [{data: res.orgCode}];
         this.getInfo(this.page, this.size);
       }
-    });
+    }).unsubscribe();
   }
 
 }

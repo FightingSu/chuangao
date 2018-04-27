@@ -43,7 +43,7 @@ export class BasicInfoComponent implements OnInit {
       contacts: new FormControl('', Validators.nullValidator),
       phoneNo: new FormControl('', Validators.nullValidator),
       briefIntro: new FormControl('', Validators.nullValidator),
-      status: new FormControl('', Validators.nullValidator),
+      // status: new FormControl('', Validators.nullValidator),
       totalMileage: new FormControl('', Validators.nullValidator),
       longitude: new FormControl('', Validators.nullValidator),
       latitude: new FormControl('', Validators.nullValidator)
@@ -92,7 +92,7 @@ export class BasicInfoComponent implements OnInit {
       if (res && res.orgType === 2) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 }

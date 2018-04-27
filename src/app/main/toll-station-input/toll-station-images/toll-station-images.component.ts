@@ -53,18 +53,20 @@ export class TollStationImagesComponent implements OnInit {
   }
 
   delete(id) {
-    this.sharedService.get(
-      `/BaseInfo/deleteOrgPic?fileId=${id}`,
-      {
-        successAlert: true,
-        animation: true
-      }
-    ).subscribe(
-      () => {
-        this.getImages(this.orgCode);
-        this.getInfo();
-      }
-    )
+    this.sharedService.addConfirm('警告', '确认删除该图片？').subscribe(res => {
+      this.sharedService.get(
+        `/BaseInfo/deleteOrgPic?fileId=${id}`,
+        {
+          successAlert: true,
+          animation: true
+        }
+      ).subscribe(
+        () => {
+          this.getImages(this.orgCode);
+          this.getInfo();
+        }
+      )
+    })
   }
 
   getInfo() {
@@ -107,7 +109,7 @@ export class TollStationImagesComponent implements OnInit {
         this.getImages(res.orgCode);
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

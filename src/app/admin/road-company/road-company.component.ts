@@ -39,7 +39,7 @@ export class RoadCompanyComponent implements OnInit {
       if (res && res.orgType === 1) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 

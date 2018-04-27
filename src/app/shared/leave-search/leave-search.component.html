@@ -15,7 +15,7 @@
           <div class="form-item">
             <p>请假类型</p>
             <select formControlName="leaveType">
-              <option value="-1">请选择</option>
+              <option value="">请选择</option>
               <option value="1">事假</option>
               <option value="2">年休</option>
               <option value="3">补休</option>
@@ -53,17 +53,19 @@
             <table class="myTable">
               <thead>
                 <tr>
-                  <th *ngFor="let field of cols">{{field.header}}</th>
+                  <th *ngFor="let field of cols" class="sortable" [class.forward]="field.isSort && order === 0" [class.reverse]="field.isSort && order === 1" (click)="tableSort(field)">{{field.header}}</th>
+                  <th>请假条下载</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let item of leaveDataList">
                   <td *ngFor="let field of cols">{{item[field.field]}}</td>
+                  <td><a *ngIf="item.picUrl" target='_blank' [href]="item.picUrl">下载</a></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p-paginator *ngIf="hasData" [rows]="size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
+          <p-paginator *ngIf="hasData" [rows]="param.size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
         </div>
       </div>
     </div>

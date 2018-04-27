@@ -14,6 +14,7 @@ export class SharedService {
   loadingModalRef: BsModalRef;
 
   private ip = `http://119.29.144.125:8080/cgfeesys`;
+  private loadingLock: boolean;
 
   constructor(
     private modalService: BsModalService,
@@ -51,15 +52,27 @@ export class SharedService {
     });
   }
 
-  openLoadingAnimation() {
+  openLoadingAnimation(): void {
     this.loadingService.createLoading();
   }
 
-  closeLoadingAnimation() {
+  closeLoadingAnimation(): void {
     this.loadingService.clearLoading();
   }
 
-  dateFormat(date) {
+  setLock(): void {
+    this.loadingLock = true;
+  }
+
+  getLock(): boolean {
+    return this.loadingLock;
+  }
+
+  clearLock(): void {
+    this.loadingLock = false;
+  }
+
+  dateFormat(date): string {
     if (date) {
       const _date = new Date(date);
       const _month = (_date.getMonth() + 1) <= 9 ? `0${(_date.getMonth() + 1)}` : _date.getMonth();
@@ -73,72 +86,101 @@ export class SharedService {
   post(path: string, param: any, options: {
     httpOptions: boolean,
     successAlert?: boolean,
-    animation?: boolean
+    animation?: boolean,
+    lock?: boolean
   }) {
-    return Observable.create(obser => {
-      let httpOptions: any = {};
+    if (options.lock && this.getLock()) {
+      this.addAlert('警告', '请勿重复操作！');
+      return Observable.create(obser => {
+        obser.next();
+      })
+    }else {
+      if (options.lock) {
+        this.setLock();
+      }
       if (options.animation) {
         this.openLoadingAnimation();
       }
-      if (options.httpOptions) {
-        httpOptions = {
-          headers: new Headers({'Content-Type': 'application/json'})
+      return Observable.create(obser => {
+        let httpOptions: any = {};
+        if (options.httpOptions) {
+          httpOptions = {
+            headers: new Headers({'Content-Type': 'application/json'})
+          }
         }
-      }
-      this.http.post(this.ip + path, param, httpOptions)
-              .map(res => res.json())
-              .subscribe(res => {
-                if (res.code) {
-                  obser.next(res);
-                  if (options.animation) {
-                    this.closeLoadingAnimation();
-                  }
-                  if (options.successAlert) {
-                    this.addAlert('通知', res.message);
-                  }
-                }else {
-                  this.addAlert('警告', res.message);
-                }
-              }, error => {
-                if (options.animation) {
-                  this.closeLoadingAnimation();
-                }
-                this.addAlert('警告', '网络异常，请重试！');
-              })
-    })
+        this.http.post(this.ip + path, param, httpOptions)
+        .map(res => res.json())
+        .subscribe(res => {
+          this.clearLock();
+          if (res.code) {
+            obser.next(res);
+            if (options.animation) {
+              this.closeLoadingAnimation();
+            }
+            if (options.successAlert) {
+              this.addAlert('通知', res.message);
+            }
+          }else {
+            this.addAlert('警告', res.message);
+            if (options.animation) {
+              this.closeLoadingAnimation();
+            }
+          }
+        }, error => {
+          this.clearLock();
+          if (options.animation) {
+            this.closeLoadingAnimation();
+          }
+          this.addAlert('警告', '网络异常，请重试！');
+        })
+      })
+    }
   }
 
   get(path: string, options: {
     successAlert?: boolean,
-    animation?: boolean
+    animation?: boolean,
+    lock?: true
   }) {
-    return Observable.create(obser => {
+    if (options.lock && this.getLock()) {
+      this.addAlert('警告', '请勿重复操作！')
+      return Observable.create(obser => {
+        obser.next();
+      })
+    }else {
+      if (options.lock) {
+        this.setLock();
+      }
       if (options.animation) {
         this.openLoadingAnimation();
       }
-      this.http.get(this.ip + path)
-              .map(res => res.json())
-              .subscribe(res => {
-                if (res.code) {
-                  if (options.animation) {
-                    this.closeLoadingAnimation();
-                  }
-                  if (options.successAlert) {
-                    this.addAlert('通知', res.message);
-                  }
-                  obser.next(res);
-                }else {
-                  if (options.animation) {
-                    this.closeLoadingAnimation();
-                  }
-                  this.addAlert('警告', res.message);
-                }
-              }, error => {
-                if (options.animation) {
-                  this.closeLoadingAnimation();
-                }
-                this.addAlert('警告', '网络异常，请重试！');
-              })
-    })
+      return Observable.create(obser => {
+        this.http.get(this.ip + path)
+        .map(res => res.json())
+        .subscribe(res => {
+          this.clearLock();
+          if (res.code) {
+            if (options.animation) {
+              this.closeLoadingAnimation();
+            }
+            if (options.successAlert) {
+              this.addAlert('通知', res.message);
+            }
+            obser.next(res);
+          }else {
+            if (options.animation) {
+              this.closeLoadingAnimation();
+            }
+            this.addAlert('警告', res.message);
+          }
+        }, error => {
+          this.clearLock();
+          if (options.animation) {
+            this.closeLoadingAnimation();
+          }
+          this.addAlert('警告', '网络异常，请重试！');
+        })
+      })
+    }
   }
 }

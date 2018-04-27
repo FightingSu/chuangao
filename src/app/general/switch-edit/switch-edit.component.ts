@@ -398,7 +398,7 @@ export class SwitchEditComponent implements OnInit {
         this.param.applyChangeType = 1;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

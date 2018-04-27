@@ -295,7 +295,7 @@ export class DeviceInputComponent implements OnInit {
         this.orgList = [{data: res.orgCode, label: res.orgName}];
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }
 

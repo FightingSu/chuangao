@@ -201,6 +201,7 @@ export class StaffTransferComponent implements OnInit {
       }
     ).subscribe(
       res => {
+        this.staffSelected = [];
         this.count = res.data.count;
         this.staffList = res.data.staffDataList;
         this.hasData = true;
@@ -232,7 +233,7 @@ export class StaffTransferComponent implements OnInit {
         this.form.value.orgName = res.orgName;
         this.getOrgInfo(this.orgCode);
       }
-    });
+    }).unsubscribe();
   }
 
 }

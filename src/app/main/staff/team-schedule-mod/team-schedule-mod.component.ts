@@ -156,7 +156,7 @@ export class TeamScheduleModComponent implements OnInit {
           animation: true
         }
       ).subscribe(
-        () => this.getInfo() 
+        () => this.getInfo()
       );
     }else {
       this.sharedService.addAlert('警告', '请选择一个模板！');
@@ -174,7 +174,7 @@ export class TeamScheduleModComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

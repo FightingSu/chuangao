@@ -17,10 +17,13 @@ export class ClothHistoryComponent implements OnInit {
   count: number;
   clothesDataList: Array<any>;
   orgList: Array<any>;
-  page = 0;
-  size = 15;
   hasData = false;
   selectionMode = 'checkbox';
+  order: number;
+  param: any = {
+    page: 0,
+    size: 15
+  }
   en = {
     firstDayOfWeek: 0,
     dayNames: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
@@ -47,7 +50,7 @@ export class ClothHistoryComponent implements OnInit {
   };
 
   constructor(
-    private sharedService: SharedService, 
+    private sharedService: SharedService,
     private store: Store<any>
   ) {
     this.login = store.select('login');
@@ -57,15 +60,38 @@ export class ClothHistoryComponent implements OnInit {
       clothesSex: new FormControl('', Validators.nullValidator)
     });
     this.cols = [
-      { field: 'userName', header: '收费员名称' },
-      { field: 'clothesTypeCN', header: '服装类型' },
-      { field: 'clothesClassificationCN', header: '服装类别' },
-      { field: 'clothesDate', header: '领用日期' },
-      { field: 'clothesChangeDate', header: '到期日期' },
-      { field: 'clothesSex', header: '性别' },
-      { field: 'clothesNum', header: '数量' },
-      { field: 'stationName', header: '收费站' }
+      { field: 'userName', header: '收费员名称', sortItem: 'userName' },
+      { field: 'clothesTypeCN', header: '服装类型', sortItem: 'clothesType' },
+      { field: 'clothesClassificationCN', header: '服装类别', sortItem: 'clothesClassification' },
+      { field: 'clothesDate', header: '领用日期', sortItem: 'clothesDate' },
+      { field: 'clothesChangeDate', header: '到期日期', sortItem: 'clothesChangeDate' },
+      { field: 'clothesSex', header: '性别', sortItem: 'clothesSex' },
+      { field: 'clothesNum', header: '数量', sortItem: 'clothesNum' },
+      { field: 'stationName', header: '收费站', sortItem: 'stationCode' }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
+
+  tableSort(item) {
+    if(this.checkStation()) {
+      this.sortByThis(item);
+    }
   }
 
   dateFormat(date) {
@@ -83,34 +109,42 @@ export class ClothHistoryComponent implements OnInit {
     this.orgList = $event;
   }
 
-  submit() {
+  checkStation(): boolean {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构');
+      this.sharedService.addAlert('警告', '未选择机构！');
+      return false;
+    }else if (this.orgList.filter(el => el.orgType !== 3).length > 0) {
+      this.sharedService.addAlert('警告', '请选择收费站！');
+      return false;
     }else {
-      this.getInfo(this.page, this.size);
+      return true;
+    }
+  }
+
+  submit() {
+    if (this.checkStation()) {
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.clothesChangeStartDate = this.dateFormat(this.clothesChangeStartDate);
     this.form.value.clothesChangeEndDate = this.dateFormat(this.clothesChangeEndDate);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    const param = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (this.form.value[el] || this.form.value[el] === 0) {
-        param[el] = this.form.value[el];
+        this.param[el] = this.form.value[el];
       }
     });
-    this.sharedService.post('/Clothes/get', JSON.stringify(param) , {
-              httpOptions: true
+    this.sharedService.post('/Clothes/get', JSON.stringify(this.param) , {
+              httpOptions: true,
+              animation: true,
+              lock: true
             })
             .subscribe(res => {
                 this.count = res.data.count;
@@ -143,8 +177,11 @@ export class ClothHistoryComponent implements OnInit {
           data: res.orgCode,
           orgType: this.orgType
         }];
+        if (res.orgType === 3) {
+          this.getInfo();
+        }
       }
-    });
+    }).unsubscribe();
   }
 
 }

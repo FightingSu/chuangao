@@ -168,7 +168,7 @@ export class LeaveEditComponent implements OnInit {
         this.applyUserId = res.userId;
         this.getInfo(this.page, this.size);
       }
-    });
+    }).unsubscribe();
   }
 
 }

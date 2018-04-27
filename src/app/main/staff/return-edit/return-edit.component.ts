@@ -18,6 +18,7 @@ export class ReturnEditComponent implements OnInit {
   cols: any;
   orgCode: string;
   userId: string;
+  order: number;
   param: any = {
     page: 0,
     size: 15
@@ -41,16 +42,16 @@ export class ReturnEditComponent implements OnInit {
   ) {
     this.login = store.select('login');
     this.cols = [
-      { field: 'orgName', header: '组织名称' },
-      { field: 'applyUserName', header: '换/顶班申请人' },
-      { field: 'applyTeamsCN', header: '换/顶班班组' },
-      { field: 'applyDate', header: '换/顶班日期' },
-      { field: 'applyShiftCN', header: '换/顶班班次' },
-      { field: 'returnShiftCN', header: '还班班次' },
-      { field: 'returnDate', header: '还班日期' },
-      { field: 'remark', header: '备注' },
-      { field: 'createTime', header: '登记时间' },
-      { field: 'returnStatusCN', header: '还班状态' }
+      // { field: 'orgName', header: '组织名称' },
+      { field: 'applyUserName', header: '换/顶班申请人', sortItem: 'applyUserName' },
+      { field: 'applyTeamsCN', header: '换/顶班班组', sortItem: 'applyTeams' },
+      { field: 'applyDate', header: '换/顶班日期', sortItem: 'applyDate' },
+      { field: 'applyShiftCN', header: '换/顶班班次', sortItem: 'applyShift' },
+      { field: 'returnShiftCN', header: '还班班次', sortItem: 'returnShift' },
+      { field: 'returnDate', header: '还班日期', sortItem: 'returnDate' },
+      { field: 'remark', header: '备注', sortItem: 'remark' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' },
+      { field: 'returnStatusCN', header: '还班状态', sortItem: 'returnStatus' }
     ];
     this.form = new FormGroup({
       remark: new FormControl('', Validators.nullValidator),
@@ -69,6 +70,23 @@ export class ReturnEditComponent implements OnInit {
     };
   }
 
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
+
   getInfo() {
     this.sharedService.post(
       '/ShiftChange/get',
@@ -76,7 +94,8 @@ export class ReturnEditComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
     ).subscribe(
       res => {
@@ -174,7 +193,7 @@ export class ReturnEditComponent implements OnInit {
         this.param.back = false;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

@@ -132,7 +132,7 @@ export class StaffCountComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getInfo(this.orgCode);
       }
-    });
+    }).unsubscribe();
 
     const xAxisData: any = [];
 

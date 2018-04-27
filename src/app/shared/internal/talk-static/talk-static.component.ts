@@ -57,7 +57,8 @@ export class TalkStaticComponent implements OnInit {
       year: `${this.year}-01-01`,
       userId: this.staff
     }), {
-      httpOptions: true
+      httpOptions: true,
+      animation: true
     })
       .subscribe(res => {
           this.talkList = res.data;

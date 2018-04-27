@@ -179,7 +179,7 @@ export class ReturnEditComponent implements OnInit {
         this.param.back = 1;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

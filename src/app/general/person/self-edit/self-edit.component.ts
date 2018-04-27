@@ -212,7 +212,7 @@ export class SelfEditComponent implements OnInit {
         this.form.value.orgName = res.orgName;
         this.getStaffInfo(res.userId);
       }
-    });
+    }).unsubscribe();
   }
 
 }

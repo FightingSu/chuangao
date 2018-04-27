@@ -4,7 +4,7 @@
     <h1 class="part-title">查询条件</h1>
     <div class="part-content clearfix">
       <form [formGroup]="form">
-          <div class="form-item">
+        <div class="form-item">
           <p>组织名称</p>
           <div class="tree-container">
             <app-drop-org-tree [initOrgName]="initOrgName" [selectionMode]="selectionMode" (selectedOrg)="selectedOrg($event)"></app-drop-org-tree>
@@ -104,7 +104,7 @@
         <table class="myTable">
           <thead>
             <tr>
-              <th *ngFor="let field of cols">{{field.header}}</th>
+              <th *ngFor="let field of cols" [class.sortable]="field.sortable" [class.forward]="field.isSort && order === 0" [class.reverse]="field.isSort && order === 1" (click)="sortByThis(field)">{{field.header}}</th>
               <th>查看明细</th>
               <th>重置密码</th>
             </tr>
@@ -117,7 +117,7 @@
             </tr>
           </tbody>
         </table>
-        <p-paginator *ngIf="hasData" [rows]="size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
+        <p-paginator *ngIf="hasData" [rows]="param.size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
       </div>
     </div>
   </div>

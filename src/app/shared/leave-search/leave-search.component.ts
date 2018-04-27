@@ -17,8 +17,11 @@ export class LeaveSearchComponent implements OnInit {
   count: number;
   leaveDataList: Array<any>;
   orgList: Array<any>;
-  page = 0;
-  size = 15;
+  order: number;
+  param: any = {
+    page: 0,
+    size: 15
+  }
   hasData = false;
   selectionMode = 'checkbox';
   en = {
@@ -56,15 +59,37 @@ export class LeaveSearchComponent implements OnInit {
       leaveType: new FormControl('', Validators.nullValidator)
     });
     this.cols = [
-      { field: 'orgName', header: '组织机构' },
-      { field: 'userName', header: '请假人' },
-      { field: 'applyTypeCN', header: '请假类型' },
-      { field: 'applyDate', header: '开始请假时间' },
-      { field: 'applyDateEnd', header: '结束请假时间' },
-      { field: 'remark', header: '请假理由' },
-      { field: 'leaveTipDownload', header: '请假条下载' },
-      { field: 'createTime', header: '登记时间' }
+      { field: 'orgName', header: '组织机构', sortItem: 'orgName' },
+      { field: 'userName', header: '请假人', sortItem: 'userName' },
+      { field: 'applyTypeCN', header: '请假类型', sortItem: 'applyType' },
+      { field: 'applyDate', header: '开始请假时间', sortItem: 'applyDate' },
+      { field: 'applyDateEnd', header: '结束请假时间', sortItem: 'applyDateEnd' },
+      { field: 'remark', header: '请假理由', sortItem: 'remark' },
+      { field: 'createTime', header: '登记时间', sortItem: 'createTime' }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
+
+  tableSort(item) {
+    if (this.checkStation()) {
+      this.sortByThis(item);
+    }
   }
 
   dateFormat(date) {
@@ -82,41 +107,45 @@ export class LeaveSearchComponent implements OnInit {
     this.orgList = $event;
   }
 
-  submit() {
+  checkStation(): boolean {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构！');
+      this.sharedService.addAlert('警告', '未选择机构！');
+      return false;
+    }else if (this.orgList.filter(el => el.orgType !== 3).length > 0) {
+      this.sharedService.addAlert('警告', '请选择收费站！');
+      return false;
     }else {
-      if (this.orgList.filter(el => el.orgType !== 3).length) {
-        alert('请选择收费站！');
-      }else {
-        this.getInfo(this.page, this.size);
-      }
+      return true;
+    }
+  }
+
+  submit() {
+    if (this.checkStation()) {
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.applyDate = this.dateFormat(this.applyDate);
     this.form.value.applyDateEnd = this.dateFormat(this.applyDateEnd);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    const param: any = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (this.form.value[el] || this.form.value[el] === 0) {
-        param[el] = this.form.value[el];
+        this.param[el] = this.form.value[el];
       }
     });
-    if (param.leaveType) {
-      param.leaveType = +param.leaveType;
+    if (this.param.leaveType) {
+      this.param.leaveType = +this.param.leaveType;
     }
-    this.sharedService.post('/Leave/getLeave', JSON.stringify(param) , {
-              httpOptions: true
+    this.sharedService.post('/Leave/getLeave', JSON.stringify(this.param) , {
+              httpOptions: true,
+              animation: true
             })
             .subscribe(res => {
                 this.count = res.data.count;
@@ -148,8 +177,11 @@ export class LeaveSearchComponent implements OnInit {
           data: res.orgCode,
           orgType: this.orgType
         }];
+        if (this.orgType === 3) {
+          this.getInfo();
+        }
       }
-    });
+    }).unsubscribe();
   }
 
 }

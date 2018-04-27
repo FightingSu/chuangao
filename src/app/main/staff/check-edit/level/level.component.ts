@@ -102,7 +102,7 @@ export class LevelComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getStaff();
       }
-    });
+    }).unsubscribe();
   }
 
 }

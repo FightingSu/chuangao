@@ -18,6 +18,7 @@ export class TrainExecuteComponent implements OnInit {
   trainForm: FormGroup;
   searchForm: FormGroup;
   orgCode: string;
+  planId: string;
   doStartDate: string;
   doEndDate: string;
   startDate: string;
@@ -47,6 +48,7 @@ export class TrainExecuteComponent implements OnInit {
   initForm: any;
   orgName: string;
   _trainTimeLong = 0.5;
+  order: number;
   param: any = {
     page: this.page,
     size: this.size
@@ -80,18 +82,11 @@ export class TrainExecuteComponent implements OnInit {
       trainDoStartDate: new FormControl('', Validators.nullValidator),
       trainDoEndDate: new FormControl('', Validators.nullValidator),
       trainTeacher: new FormControl('', Validators.nullValidator),
-      // trainDoTimeLong: new FormControl('', Validators.nullValidator),
-      // trainDoTimeNumber: new FormControl('', Validators.nullValidator),
       trainContent: new FormControl('', Validators.nullValidator),
       userIdList: new FormControl('', Validators.nullValidator)
     });
     this.searchForm = new FormGroup({
       hasDo: new FormControl('', Validators.nullValidator),
-      // trainWay: new FormControl('', Validators.nullValidator),
-      // trainType: new FormControl('', Validators.nullValidator),
-      // trainPlanName: new FormControl('', Validators.nullValidator),
-      // trainStartDate: new FormControl('', Validators.nullValidator),
-      // trainEndDate: new FormControl('', Validators.nullValidator)
     });
     this.doFilePath = '';
     this.planFilePath = '';
@@ -107,22 +102,12 @@ export class TrainExecuteComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'trainPlanName', header: '培训计划名称' },
-      { field: 'trainPlanOrgName', header: '发起单位' },
-      { field: 'trainDoOrgName', header: '落实单位' },
-      { field: 'hasDo', header: '落实状态' },
-      { field: 'trainPlanStartDate', header: '开始时间' },
-      { field: 'trainPlanEndDate', header: '结束时间' },
-      { field: 'trainWay', header: '培训方式' },
-      { field: 'trainType', header: '培训类别' },
-      { field: 'trainPlanTeacher', header: '培训讲师' },
-      { field: 'trainPlanTimeLong', header: '培训课时' },
-      { field: 'trainPlanLoc', header: '培训地点' },
-      // { field: 'trainDoTeacher', header: '落实培训讲师' },
-      // { field: 'trainDoTimeLong', header: '落实培训课时' },
-      // { field: 'trainDoAddress', header: '落实培训地点' },
-      // { field: 'trainDoStartDate', header: '落实起始时间' },
-      // { field: 'trainDoEndDate', header: '落实结束时间' }
+      { field: 'trainPlanName', header: '培训计划名称', sortItem: 'trainPlanName' },
+      { field: 'trainPlanOrgName', header: '发起单位', sortItem: 'trainPlanOrgName' },
+      { field: 'trainDoOrgName', header: '落实单位', sortItem: 'trainDoOrgName' },
+      { field: 'hasDo', header: '落实状态', sortItem: 'hasDo' },
+      { field: 'trainPlanStartDate', header: '开始时间', sortItem: 'trainPlanStartDate' },
+      { field: 'trainPlanEndDate', header: '结束时间', sortItem: 'trainPlanEndDate' },
     ];
     this.initForm = {
       trainPlanName: '',
@@ -137,6 +122,23 @@ export class TrainExecuteComponent implements OnInit {
       trainContent: '',
       trainLoc: ''
     };
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   // trainTimerChanged($event){
@@ -183,7 +185,9 @@ export class TrainExecuteComponent implements OnInit {
       delete this.param.hasDo;
     }
     this.sharedService.post('/Train/doGet', JSON.stringify(this.param) , {
-              httpOptions: true
+              httpOptions: true,
+              animation: true,
+              lock: true
             })
             .subscribe(res => {
                 this.count = res.data.count;
@@ -264,16 +268,16 @@ export class TrainExecuteComponent implements OnInit {
   // }
 
   addStaff() {
-    this.trainForm.value.trainTimeLong = this.trainTimeLong;
+    this.form.value.trainTimeLong = this.trainTimeLong;
     // this.trainForm.value.trainDoTimeLong = this.trainForm.value.trainDoTimeNumber * 0.5;
-    this.trainForm.value.trainDoStartDate = this.dateFormat(this.doStartDate);
-    this.trainForm.value.trainDoEndDate = this.dateFormat(this.doEndDate);
-    this.trainForm.value.userIdList = this.activedStaffList.map(el => el.userId);
+    this.form.value.trainDoStartDate = this.dateFormat(this.doStartDate);
+    this.form.value.trainDoEndDate = this.dateFormat(this.doEndDate);
+    this.form.value.userIdList = this.activedStaffList.map(el => el.userId);
     const tmpObj: any = {};
-    const keys = Object.keys(this.trainForm.value);
+    const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (el !== 'trainPlanName' && el !== 'trainDoOrgName') {
-        tmpObj[el] = this.trainForm.value[el];
+        tmpObj[el] = this.form.value[el];
       }
     });
     tmpObj.id = this.doId;
@@ -421,7 +425,7 @@ export class TrainExecuteComponent implements OnInit {
         this.orgName = res.orgName;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }
 

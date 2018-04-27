@@ -71,7 +71,7 @@
           <thead>
             <tr>
               <th></th>
-              <th *ngFor="let field of cols">{{field.header}}</th>
+              <th *ngFor="let field of cols" class="sortable" [class.forward]="field.isSort && order === 0" [class.reverse]="field.isSort && order === 1" (click)="sortByThis(field)">{{field.header}}</th>
               <th>请假条下载</th>
               <th>审核</th>
             </tr>
@@ -94,7 +94,7 @@
           </tbody>
         </table>
       </div>
-      <p-paginator *ngIf="hasData" [rows]="size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
+      <p-paginator *ngIf="hasData" [rows]="param.size" [totalRecords]="count" (onPageChange)="paginate($event)"></p-paginator>
     </div>
   </div>
 </div>

@@ -39,6 +39,10 @@ export class StaffDetailComponent implements OnInit {
             });
   }
 
+  goBack() {
+    window.history.back();
+  }
+
   ngOnInit() {
     if (this.staffId) {
       this.getInfo(this.staffId);

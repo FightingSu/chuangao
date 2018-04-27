@@ -138,7 +138,7 @@ export class DocSearchComponent implements OnInit {
         this.orgName = res.orgName;
         this.getInfo(this.page, this.size);
       }
-    });
+    }).unsubscribe();
   }
 
 }

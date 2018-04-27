@@ -92,7 +92,7 @@ export class TeamScheduleSetComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

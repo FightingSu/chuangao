@@ -29,6 +29,7 @@ export class GreenSearchComponent implements OnInit {
   selectionMode = 'single';
   selected: any;
   count: any;
+  order: number;
 
   boxType = ['开放货车', '封闭货车', '帆布货车', '其他货车'];
   carType = ['两轴货车', '三轴货车', '四轴货车', '五轴货车', '六轴货车'];
@@ -50,19 +51,19 @@ export class GreenSearchComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'carNo', header: '车牌号' },
-      { field: 'boxTypeCN', header: '车型' },
-      { field: 'carTypeCN', header: '轴型' },
-      { field: 'goods', header: '货物' },
-      { field: 'entryName', header: '入口路段' },
-      { field: 'entryStation', header: '入口站' },
-      { field: 'exportName', header: '出口路段' },
-      { field: 'exportStation', header: '出口站' },
-      { field: 'shiftCN', header: '班次' },
-      { field: 'firstCheckCN', header: '初检结果' },
-      { field: 'dealResultCN', header: '放行方式' },
-      { field: 'money', header: '免/缴金额(元)' },
-      { field: 'shiftCar', header: '出口车道' }
+      { field: 'carNo', header: '车牌号', sortItem: 'carNo' },
+      { field: 'boxTypeCN', header: '车型', sortItem: 'boxType' },
+      { field: 'carTypeCN', header: '轴型', sortItem: 'carType' },
+      { field: 'goods', header: '货物', sortItem: 'goods' },
+      { field: 'entryName', header: '入口路段', sortItem: 'entryName' },
+      { field: 'entryStation', header: '入口站', sortItem: 'entryStation' },
+      { field: 'exportName', header: '出口路段', sortItem: 'exportName' },
+      { field: 'exportStation', header: '出口站', sortItem: 'exportStation' },
+      { field: 'shiftCN', header: '班次', sortItem: 'shift' },
+      { field: 'firstCheckCN', header: '初检结果', sortItem: 'firstCheck' },
+      { field: 'dealResultCN', header: '放行方式', sortItem: 'dealResult' },
+      { field: 'money', header: '免/缴金额(元)', sortItem: 'money' },
+      { field: 'shiftCar', header: '出口车道', sortItem: 'shiftCar' }
     ];
     this.form = new FormGroup({
       shift: new FormControl('-1', Validators.nullValidator),
@@ -81,6 +82,23 @@ export class GreenSearchComponent implements OnInit {
     }else {
       return '';
     }
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   selectedOrg($event) {
@@ -126,7 +144,8 @@ export class GreenSearchComponent implements OnInit {
       {
         httpOptions: true,
         successAlert: false,
-        animation: true
+        animation: true,
+        lock: true
       }
     ).subscribe(
       res => {
@@ -164,7 +183,7 @@ export class GreenSearchComponent implements OnInit {
           this.getInfo();
         }
       }
-    });
+    }).unsubscribe();
   }
 
 }

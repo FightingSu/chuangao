@@ -277,7 +277,7 @@ export class AttendanceEditComponent implements OnInit {
       if (res) {
         this.orgCode = res.orgCode;
       }
-    });
+    }).unsubscribe();
   }
 
 }

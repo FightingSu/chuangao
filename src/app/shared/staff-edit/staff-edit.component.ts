@@ -24,9 +24,8 @@ export class StaffEditComponent implements OnInit {
   isChosen = false;
   login: Observable<any> = new Observable<any>();
   orgCode: string;
-  page = 0;
-  size = 15;
   count: number;
+  order: number;
   staffList: Array<any>;
   hasData: boolean;
   work_post = work_post;
@@ -42,8 +41,8 @@ export class StaffEditComponent implements OnInit {
   orgType: number;
   initForm: any;
   param: any = {
-    page: this.page,
-    size: this.size
+    page: 0,
+    size: 15
   };
 
   constructor(
@@ -79,24 +78,24 @@ export class StaffEditComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'orgName', header: '组织名称' },
-      { field: 'userId', header: '人员编码' },
-      { field: 'userName', header: '姓名' },
-      { field: 'userSex', header: '性别' },
-      { field: 'userTel', header: '手机号码' },
-      { field: 'userMail', header: '邮箱' },
-      { field: 'politicalStatus', header: '政治面貌' },
-      { field: 'workPost', header: '岗位' },
-      { field: 'birthday', header: '出生日期' },
-      { field: 'hireDate', header: '入职时间' },
-      { field: 'educational', header: '学历' },
-      { field: 'practitionerCertificate', header: '从业证书' },
-      { field: 'collectionSysId', header: '系统工号' },
-      { field: 'workLicense', header: '上岗证编号' },
-      { field: 'listGroup', header: '班组' },
-      { field: 'changeTime', header: '变更时间' },
-      { field: 'emergencyContact', header: '紧急联系人' },
-      { field: 'emergencyPhone', header: '紧急联系电话' }
+      { field: 'orgName', header: '组织名称', sortItem: 'orgCode' },
+      { field: 'userId', header: '人员编码', sortItem: 'userId' },
+      { field: 'userName', header: '姓名', sortItem: 'userName' },
+      { field: 'userSex', header: '性别', sortItem: 'userSex' },
+      { field: 'userTel', header: '手机号码', sortItem: 'userTel' },
+      { field: 'userMail', header: '邮箱', sortItem: 'userMail' },
+      { field: 'politicalStatus', header: '政治面貌', sortItem: 'politicalStatus' },
+      { field: 'workPost', header: '岗位', sortItem: 'workPost' },
+      { field: 'birthday', header: '出生日期', sortItem: 'birthday' },
+      { field: 'hireDate', header: '入职时间', sortItem: 'hireDate' },
+      { field: 'educational', header: '学历', sortItem: 'educational' },
+      { field: 'practitionerCertificate', header: '从业证书', sortItem: 'practitionerCertificate' },
+      { field: 'collectionSysId', header: '系统工号', sortItem: 'collectionSysId' },
+      { field: 'workLicense', header: '上岗证编号', sortItem: 'workLicense' },
+      { field: 'listGroup', header: '班组', sortItem: 'listGroup' },
+      { field: 'changeTime', header: '变更时间', sortItem: 'changeTime' },
+      { field: 'emergencyContact', header: '紧急联系人', sortItem: 'emergencyContact' },
+      { field: 'emergencyPhone', header: '紧急联系电话', sortItem: 'emergencyPhone' }
     ];
     this.initForm = {
       orgName: '',
@@ -146,6 +145,23 @@ export class StaffEditComponent implements OnInit {
       })
   }
 
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
+
   getInfo() {
     this.sharedService
       .post('/StaffMag/getStaff', JSON.stringify(this.param), {
@@ -153,15 +169,17 @@ export class StaffEditComponent implements OnInit {
         httpOptions: true
       })
       .subscribe(res => {
-        this.count = res.data.count;
-        if (res.data.count > 0) {
-          this.hasData = true;
-          this.staffList = res.data.staffDataList.map(el => {
-            el.politicalStatus = this.politics[el.politicalStatus];
-            el.workPost = this.work_post[el.workPost];
-            el.educational = this.educational[el.educational];
-            return el;
-          });
+        if (res) {
+          this.count = res.data.count;
+          if (res.data.count > 0) {
+            this.hasData = true;
+            this.staffList = res.data.staffDataList.map(el => {
+              el.politicalStatus = this.politics[el.politicalStatus];
+              el.workPost = this.work_post[el.workPost];
+              el.educational = this.educational[el.educational];
+              return el;
+            });
+          }
         }
       })
   }
@@ -187,7 +205,7 @@ export class StaffEditComponent implements OnInit {
       this.param.userName = this.searchName;
       this.toFirstPage();
     }else {
-      alert('请输入要查询的人员姓名！');
+      this.sharedService.addAlert('警告', '请输入要查询的人员姓名！');
     }
   }
 
@@ -200,7 +218,7 @@ export class StaffEditComponent implements OnInit {
       this.isChosen = true;
       this.isAdd = false;
     }else {
-      alert('请选择一个人员');
+      this.sharedService.addAlert('警告', '请选择一个人员！');
     }
   }
 
@@ -244,7 +262,7 @@ export class StaffEditComponent implements OnInit {
                 if (this.file) {
                   this.upload(res.data.userId);
                 }else {
-                  alert('人员录入成功！');
+                  this.sharedService.addAlert('通知', '人员录入成功！');
                   this.toFirstPage();
                 }
             });
@@ -293,10 +311,10 @@ export class StaffEditComponent implements OnInit {
     formdata.append('file', this.file);
     formdata.append('userId', userId);
     this.sharedService.post(`/upload/userInfo`, formdata, {
-      httpOptions: false
+      httpOptions: false,
+      successAlert: true
     })
       .subscribe(res => {
-        alert(res.message);
         this.file = null;
         this.filename = '';
         this.toFirstPage();
@@ -320,7 +338,7 @@ export class StaffEditComponent implements OnInit {
         this.form.value.orgName = res.orgName;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

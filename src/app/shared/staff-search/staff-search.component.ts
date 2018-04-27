@@ -23,10 +23,12 @@ export class StaffSearchComponent implements OnInit {
   educational = educational;
   staffList: Array<any>;
   orgList: Array<any>;
-  page = 0;
-  size = 15;
   hasData = false;
-  param: any = {};
+  order: number;
+  param: any = {
+    page: 0,
+    size: 15
+  };
   selectionMode = 'checkbox';
   listGroup = list_group;
   en = {
@@ -56,16 +58,35 @@ export class StaffSearchComponent implements OnInit {
       specialSkill: new FormControl('', Validators.nullValidator)
     });
     this.cols = [
-      { field: 'userName', header: '姓名' },
-      { field: 'userSex', header: '性别' },
-      { field: 'politicalStatus', header: '政治面貌' },
-      { field: 'userTel', header: '手机号码' },
-      { field: 'userMail', header: '邮箱' },
-      { field: 'workPost', header: '岗位' },
-      { field: 'educational', header: '学历' },
-      { field: 'listGroupCN', header: '班组' },
-      { field: 'orgName', header: '组织名称' }
+      { field: 'userName', header: '姓名', sortable: true, sortItem: 'userName'},
+      { field: 'userSex', header: '性别', sortable: true, sortItem: 'userSex'},
+      { field: 'politicalStatus', header: '政治面貌', sortable: true, sortItem: 'politicalStatus'},
+      { field: 'userTel', header: '手机号码', sortable: true, sortItem: 'userTel'},
+      { field: 'userMail', header: '邮箱', sortable: true, sortItem: 'userMail'},
+      { field: 'workPost', header: '岗位', sortable: true, sortItem: 'workPost'},
+      { field: 'educational', header: '学历', sortable: true, sortItem: 'educational'},
+      { field: 'listGroupCN', header: '班组', sortable: true, sortItem: 'listGroup'},
+      { field: 'orgName', header: '组织名称', sortable: true, sortItem: 'orgCode'}
     ];
+  }
+
+  sortByThis(item) {
+    if (item.sortable){
+      const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+      const prev_index = this.cols.findIndex(el => el.isSort);
+      if (this.param.column !== item.sortItem) {
+        this.param.column = item.sortItem;
+        this.order = 0;
+        if (prev_index > -1) {
+          this.cols[prev_index].isSort = false;
+        }
+        this.cols[index].isSort = true;
+      }else {
+        this.order = 1 - this.order;
+      }
+      this.param.order = this.order;
+      this.getInfo();
+    }
   }
 
   dateFormat(date) {
@@ -85,28 +106,27 @@ export class StaffSearchComponent implements OnInit {
 
   submit() {
     if (!this.orgList || this.orgList.length === 0) {
-      alert('未选择机构');
+      this.sharedService.addAlert('警告', '未选择机构！');
     }else {
-      this.getInfo(this.page, this.size);
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.birthday = this.dateFormat(this.birthday);
     this.form.value.hireDate = this.dateFormat(this.hireDate);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    this.param = {
-      page: page,
-      size: size,
-    };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (this.form.value[el] || this.form.value[el] === 0) {
         this.param[el] = this.form.value[el];
+      }else {
+        delete this.param[el];
       }
     });
     this.numberArr.forEach(el => {
@@ -115,22 +135,25 @@ export class StaffSearchComponent implements OnInit {
       }
     });
     this.sharedService.post('/StaffMag/getStaff', JSON.stringify(this.param), {
-      httpOptions: true
+      httpOptions: true,
+      animation: true,
+      lock: true
     })
       .subscribe(res => {
         this.count = res.data.count;
         if (res.data.count > 0) {
           this.hasData = true;
-          this.staffList = res.data.staffDataList.map(el => {
-            el.politicalStatus = this.politics[el.politicalStatus];
-            el.workPost = this.work_post[el.workPost];
-            el.educational = this.educational[el.educational];
-            el.listGroup = this.listGroup[el.listGroup];
-            return el;
-          });
         } else {
           this.sharedService.addAlert('警告', '没有匹配的人员信息，请重新设置查询条件！');
+          this.hasData = false;
         }
+        this.staffList = res.data.staffDataList.map(el => {
+          el.politicalStatus = this.politics[el.politicalStatus];
+          el.workPost = this.work_post[el.workPost];
+          el.educational = this.educational[el.educational];
+          el.listGroup = this.listGroup[el.listGroup];
+          return el;
+        });
       });
   }
 
@@ -151,8 +174,9 @@ export class StaffSearchComponent implements OnInit {
           data: res.orgCode,
           orgType: res.orgType
         }];
+        this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

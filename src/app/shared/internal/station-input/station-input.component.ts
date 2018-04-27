@@ -31,8 +31,6 @@ export class StationInputComponent implements OnInit {
   filename: string;
   isChosen = false;
   login: Observable<any> = new Observable<any>();
-  page = 0;
-  size = 15;
   count: number;
   staffList: Array<any>;
   hasData: boolean;
@@ -45,12 +43,10 @@ export class StationInputComponent implements OnInit {
   searchOrg: Array<any>;
   initForm: any;
   param: any = {
-    page: this.page,
-    size: this.size,
-    meetingName: '',
-    startDate: '',
-    endDate: ''
+    page: 0,
+    size: 15
   };
+  order: number;
   isShow = false;
   teams = 0;
   activedStaffList: Array<any> = [];
@@ -79,14 +75,14 @@ export class StationInputComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'meetingName', header: '会议名称' },
-      { field: 'meetingPlace', header: '会议地点' },
-      { field: 'meetingHost', header: '所属机构' },
-      { field: 'meetingDate', header: '会议时间' },
-      { field: 'meetingHost', header: '主持人' },
-      { field: 'meetingNote', header: '记录人' },
-      { field: 'meetingJoinPeopleStr', header: '参会人员' },
-      { field: 'meetingContent', header: '会议内容' }
+      { field: 'meetingName', header: '会议名称', sortItem: 'meetingName', sortable: true },
+      { field: 'meetingPlace', header: '会议地点', sortItem: 'meetingPlace', sortable: true },
+      // { field: 'meetingHost', header: '所属机构', sortItem: 'meetingHost' },
+      { field: 'meetingDate', header: '会议时间', sortItem: 'meetingDate', sortable: true },
+      { field: 'meetingHost', header: '主持人', sortItem: 'meetingHost', sortable: true },
+      { field: 'meetingNote', header: '记录人', sortItem: 'meetingNote', sortable: true },
+      { field: 'meetingJoinPeopleStr', header: '参会人员', sortItem: 'meetingJoinPeopleStr' },
+      { field: 'meetingContent', header: '会议内容', sortItem: 'meetingContent', sortable: true }
     ];
     this.initForm = {
       meetingName: '',
@@ -96,6 +92,25 @@ export class StationInputComponent implements OnInit {
       meetingJoinPeople: '',
       meetingContent: ''
     };
+  }
+
+  sortByThis(item) {
+    if (item.sortable) {
+      const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+      const prev_index = this.cols.findIndex(el => el.isSort);
+      if (this.param.column !== item.sortItem) {
+        this.param.column = item.sortItem;
+        this.order = 0;
+        if (prev_index > -1) {
+          this.cols[prev_index].isSort = false;
+        }
+        this.cols[index].isSort = true;
+      }else {
+        this.order = 1 - this.order;
+      }
+      this.param.order = this.order;
+      this.getInfo();
+    }
   }
 
   showConfirm() {
@@ -128,7 +143,8 @@ export class StationInputComponent implements OnInit {
     }
     this.sharedService.post('/StationMeeting/get', JSON.stringify(this.param), {
       httpOptions: true,
-      animation: true
+      animation: true,
+      lock: true
     })
       .subscribe(res => {
         this.count = res.data.count;
@@ -399,6 +415,6 @@ export class StationInputComponent implements OnInit {
         this.myOrgCode = res.orgCode;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }

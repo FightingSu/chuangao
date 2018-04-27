@@ -4,7 +4,7 @@
     <h1 class="part-title">收费站简介</h1>
     <div class="part-content company-briefIntro clearfix">
       <p>
-        <img *ngIf="data.stationImg0" class="company-img" [src]="data.stationImg0.filePath" alt="">
+        <img *ngIf="data.stationImg0 && data.stationImg0.filePath" class="company-img" [src]="data.stationImg0.filePath" alt="">
         {{data.stationIntroduce}}
       </p>
     </div>

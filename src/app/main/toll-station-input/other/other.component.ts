@@ -43,7 +43,7 @@ export class OtherComponent implements OnInit {
       }
     ).subscribe(
       res => {
-        this.data = res.dtata;
+        this.data = res.data;
         this.form.patchValue(res.data);
       }
     );
@@ -74,7 +74,7 @@ export class OtherComponent implements OnInit {
       if (res && res.orgType === 3) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 }

@@ -26,8 +26,6 @@ export class ClothAddComponent implements OnInit {
   isChosen = false;
   login: Observable<any> = new Observable<any>();
   orgCode: string;
-  page = 0;
-  size = 15;
   count: number;
   clothesDataList: Array<any>;
   staffList: Array<any>;
@@ -41,9 +39,10 @@ export class ClothAddComponent implements OnInit {
   searchName: string;
   orgType: number;
   initForm: any;
+  order: number;
   param: any = {
-    page: this.page,
-    size: this.size,
+    page: 0,
+    size: 15,
     applyChangeType: 2
   };
   cloth: any;
@@ -84,14 +83,14 @@ export class ClothAddComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'userName', header: '收费员名称' },
-      { field: 'clothesType', header: '服装类型' },
-      { field: 'clothesClassification', header: '服装类别' },
-      { field: 'clothesDate', header: '领用日期' },
-      { field: 'clothesChangeDate', header: '到期日期' },
-      { field: 'clothesSex', header: '性别' },
-      { field: 'clothesNum', header: '数量' },
-      { field: 'stationName', header: '收费站' }
+      { field: 'userName', header: '收费员名称', sortItem: 'userName' },
+      { field: 'clothesType', header: '服装类型', sortItem: 'clothesType' },
+      { field: 'clothesClassification', header: '服装类别', sortItem: 'clothesClassification' },
+      { field: 'clothesDate', header: '领用日期', sortItem: 'clothesDate' },
+      { field: 'clothesChangeDate', header: '到期日期', sortItem: 'clothesChangeDate' },
+      { field: 'clothesSex', header: '性别', sortItem: 'clothesSex' },
+      { field: 'clothesNum', header: '数量', sortItem: 'clothesNum' },
+      { field: 'stationName', header: '收费站', sortItem: 'stationName' }
     ];
     this.initForm = {
       applyUserId: '',
@@ -99,6 +98,23 @@ export class ClothAddComponent implements OnInit {
       shiftId: '',
       remark: ''
     };
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   getLeaveInfo(leaveId) {
@@ -182,7 +198,6 @@ export class ClothAddComponent implements OnInit {
 
   select(val) {
     this.selectedCloth = val === this.selectedCloth ? '' : val;
-    console.log(this.selectedCloth);
   }
 
   check(val) {
@@ -324,7 +339,7 @@ export class ClothAddComponent implements OnInit {
         this.getInfo();
         this.getStaff();
       }
-    });
+    }).unsubscribe();
   }
 
 }

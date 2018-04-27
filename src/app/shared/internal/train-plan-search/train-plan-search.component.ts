@@ -17,8 +17,11 @@ export class TrainPlanSearchComponent implements OnInit {
   orgList: Array<any>;
   planList: Array<any>;
   login: Observable<any> = new Observable<any>();
-  page = 0;
-  size = 15;
+  order: number;
+  param: any = {
+    page: 0,
+    size: 15
+  }
   orgType: string;
   planData: any;
   orgName: string;
@@ -51,16 +54,33 @@ export class TrainPlanSearchComponent implements OnInit {
     this.isChosen = false;
     this.login = store.select('login');
     this.cols = [
-      { field: 'trainName', header: '培训计划名称' },
-      { field: 'trainOrgName', header: '发起单位' },
-      { field: 'trainStartDate', header: '计划开始时间' },
-      { field: 'trainEndDate', header: '计划结束时间' },
-      { field: 'trainWay', header: '培训方式' },
-      { field: 'trainType', header: '培训类别' },
-      { field: 'trainTeacher', header: '培训讲师' },
-      { field: 'trainTimeLong', header: '培训课时' },
-      { field: 'trainLoc', header: '培训地点' }
+      { field: 'trainName', header: '培训计划名称', sortItem: 'trainName'  },
+      { field: 'trainOrgName', header: '发起单位', sortItem: 'trainOrgName'  },
+      { field: 'trainStartDate', header: '计划开始时间', sortItem: 'trainStartDate'  },
+      { field: 'trainEndDate', header: '计划结束时间', sortItem: 'trainEndDate'  },
+      { field: 'trainWay', header: '培训方式', sortItem: 'trainWay'  },
+      { field: 'trainType', header: '培训类别', sortItem: 'trainType'  },
+      { field: 'trainTeacher', header: '培训讲师', sortItem: 'trainTeacher'  },
+      { field: 'trainTimeLong', header: '培训课时', sortItem: 'trainTimeLong'  },
+      { field: 'trainLoc', header: '培训地点', sortItem: 'trainLoc'  }
     ];
+  }
+
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
   }
 
   dateFormat(date) {
@@ -82,35 +102,38 @@ export class TrainPlanSearchComponent implements OnInit {
     if (!this.orgList || this.orgList.length === 0) {
       this.sharedService.addAlert('警告', '未选择机构');
     } else {
-      this.getInfo(this.page, this.size);
+      this.getInfo();
     }
   }
 
   paginate(event) {
-    this.getInfo(event.page, this.size);
+    this.param.page = event.page;
+    this.getInfo();
   }
 
-  getInfo(page: number, size: number) {
+  getInfo() {
     this.form.value.trainStartDate = this.dateFormat(this.trainStartDate);
     this.form.value.trainEndDate = this.dateFormat(this.trainEndDate);
     this.form.value.orgList = this.orgList.map(el => el.data);
-    const param = {
-      page: page,
-      size: size,
-      trainWay: '',
-      trainType: '',
-      trainPlanName: '',
-      trainStartDate: '',
-      trainEndDate: ''
-    };
+    // const param = {
+    //   page: page,
+    //   size: size,
+    //   trainWay: '',
+    //   trainType: '',
+    //   trainPlanName: '',
+    //   trainStartDate: '',
+    //   trainEndDate: ''
+    // };
     const keys = Object.keys(this.form.value);
     keys.forEach(el => {
       if (this.form.value[el] || this.form.value[el] === 0) {
-        param[el] = this.form.value[el];
+        this.param[el] = this.form.value[el];
       }
     });
-    this.sharedService.post('s/Train/planGet', JSON.stringify(param) , {
-              httpOptions: true
+    this.sharedService.post('/Train/planGet', JSON.stringify(this.param) , {
+              httpOptions: true,
+              animation: true,
+              lock: true
             })
             .subscribe(res => {
                 this.count = res.data.count;
@@ -136,9 +159,9 @@ export class TrainPlanSearchComponent implements OnInit {
         this.orgType = res.orgType;
         this.orgList = [{data: res.orgCode, label: res.orgName}];
         this.orgName = res.orgName;
-        this.getInfo(this.page, this.size);
+        this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 
 }

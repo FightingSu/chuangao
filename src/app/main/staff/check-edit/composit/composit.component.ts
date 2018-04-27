@@ -223,7 +223,7 @@ export class CompositComponent implements OnInit {
         this.orgCode = res.orgCode;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
     const year = (new Date()).getFullYear();
     for (let i = 0; i < 10; i++) {
       this.yearList[i] = year - i;

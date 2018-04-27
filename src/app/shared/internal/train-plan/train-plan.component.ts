@@ -22,8 +22,6 @@ export class TrainPlanComponent implements OnInit {
   filename: string;
   isChosen = false;
   login: Observable<any> = new Observable<any>();
-  page = 0;
-  size = 15;
   count: number;
   exOrg: Array<any>;
   DoOrg: string;
@@ -39,14 +37,10 @@ export class TrainPlanComponent implements OnInit {
   selectionMode = 'single';
   searchOrg: Array<any>;
   initForm: any;
+  order: number;
   param: any = {
-    page: this.page,
-    size: this.size,
-    trainWay: '',
-    trainType: '',
-    trainPlanName: '',
-    trainStartDate: '',
-    trainEndDate: ''
+    page: 0,
+    size: 2,
   };
   trainTimeLong = 0.5;
 
@@ -81,16 +75,16 @@ export class TrainPlanComponent implements OnInit {
     };
     this.login = store.select('login');
     this.cols = [
-      { field: 'trainName', header: '培训计划名称' },
-      { field: 'trainDoOrgName', header: '落实单位' },
-      { field: 'trainStartDate', header: '开始时间' },
-      { field: 'trainEndDate', header: '结束时间' },
-      { field: 'trainWay', header: '培训方式' },
-      { field: 'trainType', header: '培训类别' },
-      { field: 'trainTeacher', header: '培训讲师' },
-      { field: 'trainTimeLong', header: '培训课时' },
-      { field: 'trainLoc', header: '培训地点' },
-      { field: 'trainContent', header: '培训内容' }
+      { field: 'trainPlanName', header: '培训计划名称', sortItem: 'trainPlanName' },
+      { field: 'trainDoOrgName', header: '落实单位', sortItem: 'trainDoOrgName' },
+      { field: 'trainStartDate', header: '开始时间', sortItem: 'trainStartDate' },
+      { field: 'trainEndDate', header: '结束时间', sortItem: 'trainEndDate' },
+      { field: 'trainWay', header: '培训方式', sortItem: 'trainWay' },
+      { field: 'trainType', header: '培训类别', sortItem: 'trainType' },
+      { field: 'trainTeacher', header: '培训讲师', sortItem: 'trainTeacher' },
+      { field: 'trainTimeLong', header: '培训课时', sortItem: 'trainTimeLong' },
+      { field: 'trainLoc', header: '培训地点', sortItem: 'trainLoc' },
+      { field: 'trainContent', header: '培训内容', sortItem: 'trainContent' }
     ];
     this.initForm = {
       trainPlanOrg: '',
@@ -107,14 +101,29 @@ export class TrainPlanComponent implements OnInit {
     };
   }
 
-  // selectedOrg($event) {
-  //   console.log($event);
-  //   this.planOrg = ($event)[0].data;
-  // }
+  sortByThis(item) {
+    const index = this.cols.findIndex(el => el.sortItem === item.sortItem);
+    const prev_index = this.cols.findIndex(el => el.isSort);
+    if (this.param.column !== item.sortItem) {
+      this.param.column = item.sortItem;
+      this.order = 0;
+      if (prev_index > -1) {
+        this.cols[prev_index].isSort = false;
+      }
+      this.cols[index].isSort = true;
+    }else {
+      this.order = 1 - this.order;
+    }
+    this.param.order = this.order;
+    this.getInfo();
+  }
 
   showConfirm() {
     if (this.selectedUser) {
-      this.sharedService.addConfirm('警告', '确认删除该记录？');
+      this.sharedService.addConfirm('警告', '确认删除该记录？')
+        .subscribe(res => {
+          this.deletePlan(this.selectedUser);
+        });
     }else {
       this.sharedService.addAlert('警告', '请选择一条记录！');
     }
@@ -151,7 +160,8 @@ export class TrainPlanComponent implements OnInit {
       this.param.orgList = this.searchOrg.map(el => el.data);
     }
     this.sharedService.post('/Train/planGet', JSON.stringify(this.param) , {
-              httpOptions: true
+              httpOptions: true,
+              animation: true
             })
             .subscribe(res => {
                 this.count = res.data.count;
@@ -228,7 +238,7 @@ export class TrainPlanComponent implements OnInit {
       })
       .subscribe(res => {
         this.sharedService.addAlert('通知', res.message);
-        this.toFirstPage();
+        this.getInfo();
       });
   }
 
@@ -236,7 +246,6 @@ export class TrainPlanComponent implements OnInit {
     this.form.value.trainTimeLong = this.trainTimeLong;
     this.form.value.trainStartDate = this.dateFormat(this.startDate);
     this.form.value.trainEndDate = this.dateFormat(this.endDate);
-    // this.form.value.orgType = +this.orgType;
     if (this.exOrg.length !== 0) {
       this.form.value.trainDoOrg = this.exOrg.map(el => el.data);
     } else {
@@ -244,12 +253,10 @@ export class TrainPlanComponent implements OnInit {
       return false;
     }
     this.form.value.trainPlanOrg = this.orgList[0].data;
-
-    // this.form.value.politicalStatus = +this.form.value.politicalStatus;
-    // this.form.value.positionalTitle = +this.form.value.positionalTitle;
-    // this.form.value.userId = '' + Math.round(1000 * Math.random());
     this.sharedService.post(`/Train/planAdd`, JSON.stringify(this.form.value), {
-              httpOptions: true
+              httpOptions: true,
+              animation: true,
+              lock: true
             })
             .subscribe(res => {
                 if (this.file) {
@@ -258,11 +265,13 @@ export class TrainPlanComponent implements OnInit {
                   this.toFirstPage();
                   this.sharedService.addAlert('通知', res.message);
                 }
+                this.startDate = '';
+                this.endDate = '';
+                this.trainTimeLong = 0.5;
             });
   }
 
   updateStaff() {
-    // this.uploading = true;
     const data: any = {
       id: this.selectedUser,
       trainPlanOrg: this.orgList[0].data,
@@ -281,15 +290,19 @@ export class TrainPlanComponent implements OnInit {
               httpOptions: true
             })
             .subscribe(res => {
+              if(res) {
                 if (this.file) {
                   this.upload(this.selectedUser);
                 } else {
-                  this.toFirstPage();
+                  this.isChosen = false;
+                  this.getInfo();
                   this.sharedService.addAlert('警告', res.message);
                 }
-            }, error => {
-              this.sharedService.addAlert('警告', '上传失败，请重试！');
-            });
+                this.startDate = '';
+                this.endDate = '';
+                this.trainTimeLong = 0.5;
+              }
+            })
   }
 
   paginate($event) {
@@ -335,6 +348,6 @@ export class TrainPlanComponent implements OnInit {
         this.planOrg = this.orgList[0].label;
         this.getInfo();
       }
-    });
+    }).unsubscribe();
   }
 }

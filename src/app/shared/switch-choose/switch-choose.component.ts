@@ -81,7 +81,7 @@ export class SwitchChooseComponent implements OnInit, DoCheck {
       if (res) {
         this.orgCode = res.orgCode;
       }
-    });
+    }).unsubscribe();
     this._username = this.userName;
     if (this.teams && this.userId) {
       this._teams = this.teams;

@@ -26,7 +26,7 @@ export class BasicInfoComponent implements OnInit {
     contacts: '联系人',
     phoneNo: '联系电话',
     briefIntro: '公司简介',
-    status: '启用状态',
+    // status: '启用状态',
     totalMileage: '所辖路段里程（单位：公里）',
     longitude: '经度',
     latitude: '纬度'
@@ -48,7 +48,7 @@ export class BasicInfoComponent implements OnInit {
       contacts: new FormControl('', Validators.nullValidator),
       phoneNo: new FormControl('', Validators.nullValidator),
       briefIntro: new FormControl('', Validators.nullValidator),
-      status: new FormControl('', Validators.nullValidator),
+      // status: new FormControl('', Validators.nullValidator),
       totalMileage: new FormControl('', Validators.nullValidator),
       longitude: new FormControl('', Validators.nullValidator),
       latitude: new FormControl('', Validators.nullValidator)
@@ -63,7 +63,9 @@ export class BasicInfoComponent implements OnInit {
         successAlert: false,
         animation: true
       }
-    ).subscribe()
+    ).subscribe(res => {
+      this.form.patchValue(res.data);
+    })
   }
 
   submit() {
@@ -100,7 +102,7 @@ export class BasicInfoComponent implements OnInit {
       if (res && res.orgType === 1) {
         this.getInfo(res.orgCode);
       }
-    });
+    }).unsubscribe();
     window.scrollTo(0, 0);
   }
 }
